@@ -29,7 +29,6 @@ public class BaseDao<T>{
         if(annotation!=null){
             tableName = annotation.value();
         }
-//        System.out.println(tableName);
         sql.append(tableName);
 
 
