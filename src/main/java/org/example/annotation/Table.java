@@ -5,12 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * @author duyujie
- * TableName 标记对应的表名
- */
-@Target(ElementType.FIELD)
+// @Table 注解（类级别）
 @Retention(RetentionPolicy.RUNTIME)
-public @interface ColumnName {
-    String value();
+@Target(ElementType.TYPE)
+public @interface Table {
+    String name() default "";
 }
