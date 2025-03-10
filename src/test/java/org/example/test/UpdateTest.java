@@ -1,0 +1,22 @@
+package org.example.test;
+
+import org.example.core.Session;
+import org.example.entity.User;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public class UpdateTest {
+
+    // 更新用户
+    @Test
+    void testCrudOperations() {
+        try (Session session = new Session()) {
+            User user = session.find(User.class, 20L);
+            user.setAge(30);
+            session.update(user);
+        }
+    }
+
+}

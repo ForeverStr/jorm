@@ -1,5 +1,6 @@
 package org.example.entity;
 
+import org.example.Enum.GenerationType;
 import org.example.annotation.*;
 
 @Table(name = "users")
@@ -13,6 +14,16 @@ public class User {
 
     @Column
     private int age;
+
+    @Column
+    private String status;
+
+    public User(String name, int age, String status){
+
+    }
+    public User(){
+
+    }
 
     public Long getId() {
         return id;
@@ -36,5 +47,13 @@ public class User {
 
     public void setAge(int age) {
         this.age = age;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

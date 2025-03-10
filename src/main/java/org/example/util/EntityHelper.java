@@ -2,7 +2,7 @@ package org.example.util;
 
 import org.example.annotation.Column;
 import org.example.annotation.GeneratedValue;
-import org.example.annotation.GenerationType;
+import org.example.Enum.GenerationType;
 import org.example.annotation.Id;
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -29,5 +29,19 @@ public class EntityHelper {
                 .filter(f -> f.isAnnotationPresent(Id.class))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No @Id field found in " + clazz.getName()));
+    }
+
+    // 获取可更新字段（排除主键）
+    public static List<Field> getUpdatableFields(Class<?> clazz) {
+        return Arrays.stream(clazz.getDeclaredFields())
+                .filter(f -> !f.isAnnotationPresent(Id.class))
+                .collect(Collectors.toList());
+    }
+
+    // 获取实体的主键值
+    public static Object getIdValue(Object entity) throws IllegalAccessException {
+        Field idField = getIdField(entity.getClass());
+        idField.setAccessible(true);
+        return idField.get(entity);
     }
 }

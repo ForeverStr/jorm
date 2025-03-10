@@ -9,9 +9,9 @@ public class DataSource {
 
     static {
         HikariConfig config = new HikariConfig();
-        config.setJdbcUrl("jdbc:mysql://122.51.67.189:3306/test?characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai");
+        config.setJdbcUrl("jdbc:mysql://localhost:3306/orm?characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai");
         config.setUsername("root");
-        config.setPassword("Jit666666!");
+        config.setPassword("root");
         config.setDriverClassName("com.mysql.cj.jdbc.Driver"); // 必须指定驱动类
         dataSource = new HikariDataSource(config);
     }

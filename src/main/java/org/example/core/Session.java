@@ -5,11 +5,15 @@ import org.example.util.EntityHelper;
 import org.example.util.SQLBuilder;
 import org.example.util.ResultSetMapper;
 import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.List;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -17,6 +21,7 @@ import java.util.ArrayList;
 public class Session implements AutoCloseable {
     private Connection connection;
     private boolean transactionActive = false;
+    private static final Logger logger = LoggerFactory.getLogger(Session.class);
 
     // 初始化 Session（使用 HikariCP 连接池）
     public Session() {
@@ -83,6 +88,121 @@ public class Session implements AutoCloseable {
         } catch (SQLException | IllegalAccessException | InstantiationException e) {
             throw new RuntimeException("Find failed", e);
         }
+    }
+
+    // 更新实体（根据 ID）
+    public <T> void update(T entity) {
+        try {
+            String sql = SQLBuilder.buildUpdate(entity.getClass());
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                setUpdateParameters(stmt, entity);
+                stmt.executeUpdate();
+            }
+        } catch (SQLException | IllegalAccessException e) {
+            throw new RuntimeException("Update failed", e);
+        }
+    }
+
+    // 删除实体（根据 ID）
+    public <T> void delete(T entity) {
+        try {
+            String sql = SQLBuilder.buildDelete(entity.getClass());
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                Object idValue = EntityHelper.getIdValue(entity);
+                stmt.setObject(1, idValue);
+                stmt.executeUpdate();
+            }
+        } catch (SQLException | IllegalAccessException e) {
+            throw new RuntimeException("Delete failed", e);
+        }
+    }
+
+    // 批量插入（返回生成的主键列表）
+    public <T> List<Long> batchSave(List<T> entities) {
+        logger.debug("批量插入 SQL: {}", SQLBuilder.buildInsert(entities.get(0).getClass()));
+        //非空逻辑校验
+        for (T entity : entities) {
+            validateEntity(entity);
+        }
+        if (entities.isEmpty()) return Collections.emptyList();
+
+        try {
+            String sql = SQLBuilder.buildInsert(entities.get(0).getClass());
+            try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                for (T entity : entities) {
+                    setInsertParameters(stmt, entity);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+
+                // 获取所有生成的主键
+                ResultSet rs = stmt.getGeneratedKeys();
+                List<Long> ids = new ArrayList<>();
+                while (rs.next()) {
+                    ids.add(rs.getLong(1));
+                }
+                return ids;
+            }
+        } catch (SQLException | IllegalAccessException e) {
+            throw new RuntimeException("Batch save failed", e);
+        }
+    }
+
+    // 批量更新
+    public <T> void batchUpdate(List<T> entities) {
+        if (entities.isEmpty()) return;
+
+        try {
+            String sql = SQLBuilder.buildUpdate(entities.get(0).getClass());
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+                for (T entity : entities) {
+                    setUpdateParameters(stmt, entity);
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (SQLException | IllegalAccessException e) {
+            throw new RuntimeException("Batch update failed", e);
+        }
+    }
+
+    private <T> void validateEntity(T entity) {
+        // 遍历所有字段，检查 @Column(nullable = false) 的字段是否非空
+        for (Field field : entity.getClass().getDeclaredFields()) {
+            Column column = field.getAnnotation(Column.class);
+            if (column != null && !column.nullable()) {
+                field.setAccessible(true);
+                try {
+                    Object value = field.get(entity);
+                    if (value == null) {
+                        throw new IllegalArgumentException(
+                                "Field '" + field.getName() + "' cannot be null"
+                        );
+                    }
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException("Validation failed", e);
+                }
+            }
+        }
+    }
+
+    // 工具方法：设置 UPDATE 参数（排除主键）
+    private <T> void setUpdateParameters(PreparedStatement stmt, T entity)
+            throws SQLException, IllegalAccessException {
+        Class<?> clazz = entity.getClass();
+        List<Field> fields = EntityHelper.getUpdatableFields(clazz);
+        Field idField = EntityHelper.getIdField(clazz);
+
+        // 设置非主键字段
+        int index = 1;
+        for (Field field : fields) {
+            field.setAccessible(true);
+            stmt.setObject(index++, field.get(entity));
+        }
+
+        // 设置 WHERE 主键条件
+        idField.setAccessible(true);
+        stmt.setObject(index, idField.get(entity));
     }
 
     // 关闭连接
