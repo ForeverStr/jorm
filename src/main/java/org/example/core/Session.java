@@ -219,13 +219,16 @@ public class Session implements AutoCloseable {
     }
 
     // 工具方法：设置 INSERT 参数
-    private <T> void setInsertParameters(PreparedStatement stmt, T entity) throws SQLException, IllegalAccessException {
+    private <T> void setInsertParameters(PreparedStatement stmt, T entity)
+            throws SQLException, IllegalAccessException {
         Class<?> clazz = entity.getClass();
         List<Field> fields = EntityHelper.getInsertableFields(clazz);
+
         for (int i = 0; i < fields.size(); i++) {
             Field field = fields.get(i);
-            field.setAccessible(true);
-            stmt.setObject(i + 1, field.get(entity));
+            field.setAccessible(true);  // 强制访问私有字段
+            Object value = field.get(entity);
+            stmt.setObject(i + 1, value);
         }
     }
 

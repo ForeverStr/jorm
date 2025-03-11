@@ -9,10 +9,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 public class EntityHelper {
-    // 获取所有需要插入的字段（排除自增主键）
+    // 获取需要插入的字段（排除自增主键）
     public static List<Field> getInsertableFields(Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredFields())
-                .filter(f -> !f.isAnnotationPresent(Id.class) || f.getAnnotation(GeneratedValue.class).strategy() != GenerationType.IDENTITY)
+                .filter(f -> {
+                    // 排除自增主键
+                    if (f.isAnnotationPresent(Id.class)) {
+                        GeneratedValue generatedValue = f.getAnnotation(GeneratedValue.class);
+                        return generatedValue == null || generatedValue.strategy() != GenerationType.IDENTITY;
+                    }
+                    return true;
+                })
                 .collect(Collectors.toList());
     }
 

@@ -13,7 +13,7 @@ public class DeleteTest {
     @Test
     void testCrudOperations() {
         try (Session session = new Session()) {
-            User user = session.find(User.class, 15L);
+            User user = session.find(User.class, 16L);
             session.delete(user);
         }
     }

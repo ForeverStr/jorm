@@ -20,13 +20,11 @@ public class SQLBuilder {
         String tableName = table.name().isEmpty() ? clazz.getSimpleName().toLowerCase() : table.name();
         List<Field> fields = EntityHelper.getInsertableFields(clazz);
 
-        // 修复 Stream 处理逻辑
         String columns = fields.stream()
-                .filter(f -> f.getAnnotation(Column.class) != null)  // 过滤掉没有 @Column 注解的字段
                 .map(f -> {
                     Column column = f.getAnnotation(Column.class);
-                    // 处理列名：如果注解的 name 为空，则使用字段名
-                    return column.name().isEmpty() ? f.getName() : column.name();
+                    String columnName = (column != null && !column.name().isEmpty()) ? column.name() : f.getName();
+                    return columnName;
                 })
                 .collect(Collectors.joining(", "));
 
