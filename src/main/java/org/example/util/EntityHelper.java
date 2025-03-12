@@ -12,6 +12,7 @@ public class EntityHelper {
     // 获取需要插入的字段（排除自增主键）
     public static List<Field> getInsertableFields(Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredFields())
+                //过滤字段
                 .filter(f -> {
                     // 排除自增主键
                     if (f.isAnnotationPresent(Id.class)) {
@@ -20,6 +21,7 @@ public class EntityHelper {
                     }
                     return true;
                 })
+                //收集非主键字段
                 .collect(Collectors.toList());
     }
 
@@ -35,7 +37,7 @@ public class EntityHelper {
         return Arrays.stream(clazz.getDeclaredFields())
                 .filter(f -> f.isAnnotationPresent(Id.class))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("No @Id field found in " + clazz.getName()));
+                .orElseThrow(() -> new RuntimeException("该类没有主键字段" + clazz.getName()));
     }
 
     // 获取可更新字段（排除主键）

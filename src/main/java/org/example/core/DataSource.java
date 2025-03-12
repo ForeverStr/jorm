@@ -20,7 +20,7 @@ public class DataSource {
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {
-            throw new RuntimeException("Get connection failed", e);
+            throw new RuntimeException("连接失败", e);
         }
     }
 }

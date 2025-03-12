@@ -4,6 +4,9 @@ import org.example.annotation.Table;
 import org.example.annotation.Column;
 import org.example.annotation.Id;
 import org.example.annotation.GeneratedValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,21 +17,24 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SQLBuilder {
-    // 生成 INSERT SQL（例如：INSERT INTO user (name, age) VALUES (?, ?)）
+    private static final Logger log = LoggerFactory.getLogger(SQLBuilder.class);
+    // 生成 INSERT SQL
     public static String buildInsert(Class<?> clazz) {
         Table table = clazz.getAnnotation(Table.class);
         String tableName = table.name().isEmpty() ? clazz.getSimpleName().toLowerCase() : table.name();
         List<Field> fields = EntityHelper.getInsertableFields(clazz);
 
         String columns = fields.stream()
+                //处理列表每个字段，如果设置了column的name就取该值，没有就取字段名
                 .map(f -> {
                     Column column = f.getAnnotation(Column.class);
-                    String columnName = (column != null && !column.name().isEmpty()) ? column.name() : f.getName();
-                    return columnName;
+                    return (column != null && !column.name().isEmpty()) ? column.name() : f.getName();
                 })
+                //将所有列名通过逗号和空格连成字符串
                 .collect(Collectors.joining(", "));
-
+        log.info("fields：{}",fields);
         String placeholders = String.join(", ", Collections.nCopies(fields.size(), "?"));
+        log.info("fields：{}",placeholders);
         return String.format("INSERT INTO %s (%s) VALUES (%s)", tableName, columns, placeholders);
     }
 

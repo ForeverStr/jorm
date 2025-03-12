@@ -4,7 +4,6 @@ import org.example.annotation.*;
 import org.example.util.EntityHelper;
 import org.example.util.SQLBuilder;
 import org.example.util.ResultSetMapper;
-import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +20,7 @@ import java.util.ArrayList;
 public class Session implements AutoCloseable {
     private Connection connection;
     private boolean transactionActive = false;
-    private static final Logger logger = LoggerFactory.getLogger(Session.class);
+    private static final Logger log = LoggerFactory.getLogger(Session.class);
 
     // 初始化 Session（使用 HikariCP 连接池）
     public Session() {
@@ -62,10 +61,14 @@ public class Session implements AutoCloseable {
     public <T> void save(T entity) {
         try {
             String sql = SQLBuilder.buildInsert(entity.getClass());
-            try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            log.info("预编译前的sql：{}",sql);
+            //PreparedStatement预编译sql语句，提高性能，后续的set方法明确sql语句的结构和参数值，避免sql注入，还可以自动获取主键值
+            try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
+            {
+                log.info("预编译后的sql：{}",stmt);
                 setInsertParameters(stmt, entity);
                 stmt.executeUpdate();
-                // 处理自增主键
+                // 处理自增主键,ResultSet数据库查询结果集
                 ResultSet rs = stmt.getGeneratedKeys();
                 if (rs.next()) {
                     setIdValue(entity, rs.getLong(1));
@@ -113,13 +116,13 @@ public class Session implements AutoCloseable {
                 stmt.executeUpdate();
             }
         } catch (SQLException | IllegalAccessException e) {
-            throw new RuntimeException("Delete failed", e);
+            throw new RuntimeException("删除失败", e);
         }
     }
 
     // 批量插入（返回生成的主键列表）
     public <T> List<Long> batchSave(List<T> entities) {
-        logger.debug("批量插入 SQL: {}", SQLBuilder.buildInsert(entities.get(0).getClass()));
+        log.debug("批量插入 SQL: {}", SQLBuilder.buildInsert(entities.get(0).getClass()));
         //非空逻辑校验
         for (T entity : entities) {
             validateEntity(entity);
@@ -203,7 +206,7 @@ public class Session implements AutoCloseable {
         // 设置 WHERE 主键条件
         idField.setAccessible(true);
         stmt.setObject(index, idField.get(entity));
-    }
+    }   
 
     // 关闭连接
     @Override
@@ -228,7 +231,7 @@ public class Session implements AutoCloseable {
             Field field = fields.get(i);
             field.setAccessible(true);  // 强制访问私有字段
             Object value = field.get(entity);
-            stmt.setObject(i + 1, value);
+            stmt.setObject(i+1, value);
         }
     }
 

@@ -16,7 +16,7 @@ public class QueryTest {
     void testCrudOperations() {
         try (Session session = new Session()) {
             List<User> users = new Query<>(User.class, session)
-                    .where("age > :age").param("age", 18).orderBy("username DESC")//name改为username,数据库字段而非实体类字段
+                    .where("age > :age").param("age", 18).orderBy("username DESC")
                     .limit(10)
                     .list();
             assertFalse(users.isEmpty());
