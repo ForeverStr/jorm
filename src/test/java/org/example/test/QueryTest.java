@@ -15,12 +15,18 @@ public class QueryTest {
     @Test
     void testCrudOperations() {
         try (Session session = new Session()) {
-            List<User> users = new Query<>(User.class, session)
-                    .where("age > :age").param("age", 18).orderBy("username DESC")
-                    .limit(10)
-                    .list();
-            assertFalse(users.isEmpty());
-            users.forEach(u -> System.out.println(u.getName()));
+            session.beginTransaction();
+            try {
+                List<User> users = new Query<>(User.class, session)
+                        .where("age > :age").param("age", 18).orderBy("username DESC")
+                        .limit(10)
+                        .list();
+                assertFalse(users.isEmpty());
+                users.forEach(u -> System.out.println(u.getName()));
+            }catch (Exception e){
+                session.rollback();
+                throw new RuntimeException("查询失败",e);
+            }
         }
     }
 

@@ -13,9 +13,15 @@ public class UpdateTest {
     @Test
     void testCrudOperations() {
         try (Session session = new Session()) {
-            User user = session.find(User.class, 20L);
-            user.setAge(30);
-            session.update(user);
+            session.beginTransaction();
+            try {
+                User user = session.find(User.class, 20L);
+                user.setAge(30);
+                session.update(user);
+            }catch (Exception e){
+                session.rollback();
+                throw new RuntimeException("更新失败",e);
+            }
         }
     }
 

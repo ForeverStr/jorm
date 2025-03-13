@@ -13,8 +13,14 @@ public class DeleteTest {
     @Test
     void testCrudOperations() {
         try (Session session = new Session()) {
-            User user = session.find(User.class, 16L);
-            session.delete(user);
+            session.beginTransaction();
+            try {
+                User user = session.find(User.class, 16L);
+                session.delete(user);
+            }catch (Exception e){
+                session.rollback();
+                throw new RuntimeException("删除失败",e);
+            }
         }
     }
 
