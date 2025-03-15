@@ -19,7 +19,9 @@ public class User {
     private String status;
 
     public User(String name, int age, String status){
-
+        this.name = name;
+        this.age = age;
+        this.status = status;
     }
     public User(){
 
