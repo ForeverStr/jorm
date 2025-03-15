@@ -19,10 +19,9 @@ public class FindTest {
         try (Session session = new Session()) {
             session.beginTransaction();
             try {
-                User user = session.find(User.class, 30L);
+                User user = session.where("user_name","Alice").where("age",44).find(User.class);
                 assertNotNull(user);
-                log.debug("{}",user);
-                assertEquals("admin", user.getName());
+                assertEquals("Alice", user.getName());
                 System.out.println("User name: " + user.getName());
             }catch (Exception e){
                 session.rollback();
