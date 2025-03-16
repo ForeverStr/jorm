@@ -19,7 +19,6 @@ public class FindTest {
         try (Session session = new Session()) {
             User user = session.find(User.class, 30L);
             assertNotNull(user);
-            log.debug("{}",user);
             assertEquals("admin", user.getName());
             System.out.println("User name: " + user.getName());
         }
