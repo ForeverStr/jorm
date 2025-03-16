@@ -18,6 +18,7 @@ public class BatchSaveTest {
                     new User("Bob", 25,"active"),
                     new User("Charlie", 30,"active")
             );
+            
             List<Long> ids = session.batchSave(validUsers);
             System.out.println("插入成功，生成的主键 IDs: " + ids);
         } catch (Exception e) {

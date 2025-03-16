@@ -9,7 +9,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username", nullable = false)
+    @Column(name = "user_name", nullable = false)
     private String name;
 
     @Column
@@ -19,7 +19,9 @@ public class User {
     private String status;
 
     public User(String name, int age, String status){
-
+        this.name = name;
+        this.age = age;
+        this.status = status;
     }
     public User(){
 

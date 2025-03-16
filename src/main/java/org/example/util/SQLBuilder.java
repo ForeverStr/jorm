@@ -4,6 +4,7 @@ import org.example.annotation.Table;
 import org.example.annotation.Column;
 import org.example.annotation.Id;
 import org.example.annotation.GeneratedValue;
+import org.example.param.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +75,24 @@ public class SQLBuilder {
         }
         return sql.toString();
     }
+    // 生成 SELECT SQL（例如：SELECT * FROM users WHERE user_name = ? AND age = ?）
+    public static String buildFindSelect(Class<?> clazz, List<Condition> conditions) {
+        Table table = clazz.getAnnotation(Table.class);
+        String tableName = table != null && !table.name().isEmpty()
+                ? table.name()
+                : clazz.getSimpleName().toLowerCase();
 
+        StringBuilder sql = new StringBuilder("SELECT * FROM ").append(tableName);
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE ");
+            List<String> conditionClauses = new ArrayList<>();
+            for (Condition cond : conditions) {
+                conditionClauses.add(cond.getColumn() + " " + cond.getOperator() + " ?");
+            }
+            sql.append(String.join(" AND ", conditionClauses));
+        }
+        return sql.toString();
+    }
     // 生成 UPDATE SQL（例如：UPDATE users SET username=?, age=? WHERE id=?）
     public static String buildUpdate(Class<?> clazz) {
         Table table = clazz.getAnnotation(Table.class);

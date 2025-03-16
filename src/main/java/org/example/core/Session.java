@@ -1,6 +1,7 @@
 package org.example.core;
 
 import org.example.annotation.*;
+import org.example.param.Condition;
 import org.example.util.EntityHelper;
 import org.example.util.SQLBuilder;
 import org.example.util.ResultSetMapper;
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 public class Session implements AutoCloseable {
     private Connection connection;
     private boolean transactionActive = false;
+    private final List<Condition> conditions = new ArrayList<>(); // 存储查询条件
+    private final List<Object> params = new ArrayList<>();        // 存储参数值
     private static final Logger log = LoggerFactory.getLogger(Session.class);
 
     // 初始化 Session（使用 HikariCP 连接池）
@@ -79,17 +82,34 @@ public class Session implements AutoCloseable {
         }
     }
 
-    // 根据 ID 查询（SELECT）
-    public <T> T find(Class<T> clazz, Object id) {
+    // 链式添加等值条件（如 where("user_name", "admin") → user_name = ?）
+    public Session where(String column, Object value) {
+        conditions.add(new Condition(column, "=", value));
+        params.add(value);
+        return this;
+    }
+
+    // 链式添加带操作符的条件（如 where("age", ">", 20)）
+    public Session where(String column, String operator, Object value) {
+        conditions.add(new Condition(column, operator, value));
+        params.add(value);
+        return this;
+    }
+
+    // 执行查询并返回单个实体
+    public <T> T find(Class<T> clazz) {
         try {
-            String sql = SQLBuilder.buildSelectById(clazz);
+            String sql = SQLBuilder.buildFindSelect(clazz, conditions);
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-                stmt.setObject(1, id);
+                // 绑定参数
+                for (int i = 0; i < params.size(); i++) {
+                    stmt.setObject(i + 1, params.get(i));
+                }
                 ResultSet rs = stmt.executeQuery();
                 return ResultSetMapper.mapToEntity(rs, clazz);
             }
         } catch (SQLException | IllegalAccessException | InstantiationException e) {
-            throw new RuntimeException("Find failed", e);
+            throw new RuntimeException("Query failed", e);
         }
     }
 
