@@ -16,7 +16,7 @@ public class SaveTest {
             session.beginTransaction();
             try {
                 User user = new User();
-                user.setName("test1");
+                user.setName("test2");
                 user.setAge(20);
                 session.save(user);
                 assertNotNull(user.getId(),"主键自增失败");// 验证自增主键是否生成
