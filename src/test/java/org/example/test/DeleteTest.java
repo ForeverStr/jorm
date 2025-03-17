@@ -1,9 +1,5 @@
 package org.example.test;
 
-import org.example.core.Session;
-import org.example.entity.User;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 

@@ -1,10 +1,8 @@
 package org.example.test;
 
-import org.example.core.Session;
+import org.example.core.JormSession;
 import org.example.entity.User;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -12,7 +10,7 @@ public class SaveTest {
     //保存测试
     @Test
     void testSaveOperations(){
-        try (Session session = new Session()) {
+        try (JormSession session = new JormSession()) {
             session.beginTransaction();
             try {
                 User user = new User();

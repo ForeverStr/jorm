@@ -18,15 +18,15 @@ import java.util.List;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-public class Session implements AutoCloseable {
+public class JormSession implements AutoCloseable {
     private Connection connection;
     private boolean transactionActive = false;
     private final List<Condition> conditions = new ArrayList<>(); // 存储查询条件
     private final List<Object> params = new ArrayList<>();        // 存储参数值
-    private static final Logger log = LoggerFactory.getLogger(Session.class);
+    private static final Logger log = LoggerFactory.getLogger(JormSession.class);
 
     // 初始化 Session（使用 HikariCP 连接池）
-    public Session() {
+    public JormSession() {
         this.connection = DataSource.getConnection();
     }
 
@@ -83,21 +83,21 @@ public class Session implements AutoCloseable {
     }
 
     // 链式添加等值条件（如 where("user_name", "admin") → user_name = ?）
-    public Session where(String column, Object value) {
+    public JormSession where(String column, Object value) {
         conditions.add(new Condition(column, "=", value));
         params.add(value);
         return this;
     }
 
     // 链式添加带操作符的条件（如 where("age", ">", 20)）
-    public Session where(String column, String operator, Object value) {
+    public JormSession where(String column, String operator, Object value) {
         conditions.add(new Condition(column, operator, value));
         params.add(value);
         return this;
     }
 
-    // 执行查询并返回单个实体
-    public <T> T find(Class<T> clazz) {
+    // 执行查询
+    public <T> List<T> find(Class<T> clazz) {
         try {
             String sql = SQLBuilder.buildFindSelect(clazz, conditions);
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -106,7 +106,7 @@ public class Session implements AutoCloseable {
                     stmt.setObject(i + 1, params.get(i));
                 }
                 ResultSet rs = stmt.executeQuery();
-                return ResultSetMapper.mapToEntity(rs, clazz);
+                return ResultSetMapper.mapToList(rs,clazz);
             }
         } catch (SQLException | IllegalAccessException | InstantiationException e) {
             throw new RuntimeException("Query failed", e);

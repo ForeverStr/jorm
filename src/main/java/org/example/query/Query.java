@@ -1,6 +1,6 @@
 package org.example.query;
 
-import org.example.core.Session;
+import org.example.core.JormSession;
 import org.example.util.ResultSetMapper;
 import org.example.util.SQLBuilder;
 
@@ -13,14 +13,14 @@ import java.util.List;
 import java.util.Map;
 public class Query<T> {
     private final Class<T> clazz;
-    private final Session session;
+    private final JormSession session;
     private final List<String> conditions = new ArrayList<>();
     private final Map<String, Object> params = new HashMap<>();
     private final List<Object> orderedParams = new ArrayList<>();
     private String orderBy;
     private Integer limit;
 
-    public Query(Class<T> clazz, Session session) {
+    public Query(Class<T> clazz, JormSession session) {
         this.clazz = clazz;
         this.session = session;
     }

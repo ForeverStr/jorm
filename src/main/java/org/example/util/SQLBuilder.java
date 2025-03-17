@@ -78,10 +78,7 @@ public class SQLBuilder {
     // 生成 SELECT SQL（例如：SELECT * FROM users WHERE user_name = ? AND age = ?）
     public static String buildFindSelect(Class<?> clazz, List<Condition> conditions) {
         Table table = clazz.getAnnotation(Table.class);
-        String tableName = table != null && !table.name().isEmpty()
-                ? table.name()
-                : clazz.getSimpleName().toLowerCase();
-
+        String tableName = table != null && !table.name().isEmpty() ? table.name() : clazz.getSimpleName().toLowerCase();
         StringBuilder sql = new StringBuilder("SELECT * FROM ").append(tableName);
         if (!conditions.isEmpty()) {
             sql.append(" WHERE ");

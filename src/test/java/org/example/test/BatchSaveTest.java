@@ -1,6 +1,6 @@
 package org.example.test;
 
-import org.example.core.Session;
+import org.example.core.JormSession;
 import org.example.entity.User;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ public class BatchSaveTest {
     @Test
     void testCrudOperations() {
         // 正确的批量插入代码
-        try (Session session = new Session()) {
+        try (JormSession session = new JormSession()) {
             List<User> validUsers = Arrays.asList(
                     new User("Bob", 25,"active"),
                     new User("Charlie", 30,"active")

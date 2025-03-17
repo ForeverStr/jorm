@@ -1,6 +1,6 @@
 package org.example.test;
 
-import org.example.core.Session;
+import org.example.core.JormSession;
 import org.example.entity.User;
 import org.example.query.Query;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ public class BatchUpdateTest {
     // 批量更新
     @Test
     void testCrudOperations() {
-        try (Session session = new Session()) {
+        try (JormSession session = new JormSession()) {
             session.beginTransaction();
             try {
                 Query<User> query = new Query<>(User.class, session)

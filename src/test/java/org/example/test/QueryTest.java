@@ -1,6 +1,6 @@
 package org.example.test;
 
-import org.example.core.Session;
+import org.example.core.JormSession;
 import org.example.entity.User;
 import org.example.query.Query;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ public class QueryTest {
     // 链式查询
     @Test
     void testCrudOperations() {
-        try (Session session = new Session()) {
+        try (JormSession session = new JormSession()) {
             session.beginTransaction();
             try {
                 List<User> users = new Query<>(User.class, session)
