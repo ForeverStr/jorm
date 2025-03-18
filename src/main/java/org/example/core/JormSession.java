@@ -1,10 +1,9 @@
 package org.example.core;
 
 import org.example.annotation.*;
-import org.example.param.Condition;
 import org.example.util.EntityHelper;
 import org.example.util.SQLBuilder;
-import org.example.util.ResultSetMapper;
+import org.example.util.SessionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,10 +20,7 @@ import java.util.ArrayList;
 public class JormSession implements AutoCloseable {
     private Connection connection;
     private boolean transactionActive = false;
-    private final List<Condition> conditions = new ArrayList<>(); // 存储查询条件
-    private final List<Object> params = new ArrayList<>();        // 存储参数值
     private static final Logger log = LoggerFactory.getLogger(JormSession.class);
-
     // 初始化 Session（使用 HikariCP 连接池）
     public JormSession() {
         this.connection = DataSource.getConnection();
@@ -69,47 +65,16 @@ public class JormSession implements AutoCloseable {
             try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
             {
                 log.info("预编译后的sql：{}",stmt);
-                setInsertParameters(stmt, entity);
+                SessionHelper.setInsertParameters(stmt, entity);
                 stmt.executeUpdate();
                 // 处理自增主键,ResultSet数据库查询结果集
                 ResultSet rs = stmt.getGeneratedKeys();
                 if (rs.next()) {
-                    setIdValue(entity, rs.getLong(1));
+                    SessionHelper.setIdValue(entity, rs.getLong(1));
                 }
             }
         } catch (SQLException | IllegalAccessException e) {
             throw new RuntimeException("Save failed", e);
-        }
-    }
-
-    // 链式添加等值条件（如 where("user_name", "admin") → user_name = ?）
-    public JormSession where(String column, Object value) {
-        conditions.add(new Condition(column, "=", value));
-        params.add(value);
-        return this;
-    }
-
-    // 链式添加带操作符的条件（如 where("age", ">", 20)）
-    public JormSession where(String column, String operator, Object value) {
-        conditions.add(new Condition(column, operator, value));
-        params.add(value);
-        return this;
-    }
-
-    // 执行查询
-    public <T> List<T> find(Class<T> clazz) {
-        try {
-            String sql = SQLBuilder.buildFindSelect(clazz, conditions);
-            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-                // 绑定参数
-                for (int i = 0; i < params.size(); i++) {
-                    stmt.setObject(i + 1, params.get(i));
-                }
-                ResultSet rs = stmt.executeQuery();
-                return ResultSetMapper.mapToList(rs,clazz);
-            }
-        } catch (SQLException | IllegalAccessException | InstantiationException e) {
-            throw new RuntimeException("Query failed", e);
         }
     }
 
@@ -153,7 +118,7 @@ public class JormSession implements AutoCloseable {
             String sql = SQLBuilder.buildInsert(entities.get(0).getClass());
             try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 for (T entity : entities) {
-                    setInsertParameters(stmt, entity);
+                    SessionHelper.setInsertParameters(stmt, entity);
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
@@ -241,33 +206,6 @@ public class JormSession implements AutoCloseable {
         }
     }
 
-    // 工具方法：设置 INSERT 参数
-    private <T> void setInsertParameters(PreparedStatement stmt, T entity)
-            throws SQLException, IllegalAccessException {
-        Class<?> clazz = entity.getClass();
-        List<Field> fields = EntityHelper.getInsertableFields(clazz);
-
-        for (int i = 0; i < fields.size(); i++) {
-            Field field = fields.get(i);
-            field.setAccessible(true);  // 强制访问私有字段
-            Object value = field.get(entity);
-            stmt.setObject(i+1, value);
-        }
-    }
-
-    // 工具方法：设置自增主键值
-    private <T> void setIdValue(T entity, Object idValue) throws IllegalAccessException {
-        Field idField = EntityHelper.getIdField(entity.getClass());
-        if (idField != null) {
-            idField.setAccessible(true);
-            // 如果是 Long 类型，直接赋值；如果是其他类型，转换后再赋值
-            if (idField.getType() == Long.class) {
-                idField.set(entity, idValue);
-            } else {
-                idField.set(entity, ((Number) idValue).longValue());
-            }
-        }
-    }
 
     public Connection getConnection() {
         return connection;

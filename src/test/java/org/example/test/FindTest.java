@@ -1,5 +1,6 @@
 package org.example.test;
 
+import org.example.core.FindSession;
 import org.example.core.JormSession;
 import org.example.entity.User;
 import org.junit.jupiter.api.Test;
@@ -18,17 +19,21 @@ public class FindTest {
     // 查询用户
     @Test
     void testCrudOperations() {
-        try (JormSession session = new JormSession()) {
-            session.beginTransaction();
+        try (FindSession findSession = new FindSession()) {
+            findSession.beginTransaction();
             try {
-                List<User> userList = session
+                List<User> userList = findSession
                         .where("user_name","Alice")
-                        .where("age","=",25)
+                        .where("age","<",50)
+                        .orderBy("age")
+                        .limit(2)
                         .find(User.class);
+                findSession.commit();
                 assertNotNull(userList);
-                System.out.println("size: " + userList.size());
+                System.out.println(userList.get(0).getAge());
+                System.out.println(userList.get(1).getAge());
             }catch (Exception e){
-                session.rollback();
+                findSession.rollback();
                 throw new RuntimeException("查询失败",e);
             }
         }

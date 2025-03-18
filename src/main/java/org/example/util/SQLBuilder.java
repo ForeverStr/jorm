@@ -76,7 +76,7 @@ public class SQLBuilder {
         return sql.toString();
     }
     // 生成 SELECT SQL（例如：SELECT * FROM users WHERE user_name = ? AND age = ?）
-    public static String buildFindSelect(Class<?> clazz, List<Condition> conditions) {
+    public static String buildFindSelect(Class<?> clazz, List<Condition> conditions,Integer limit,String orderBy) {
         Table table = clazz.getAnnotation(Table.class);
         String tableName = table != null && !table.name().isEmpty() ? table.name() : clazz.getSimpleName().toLowerCase();
         StringBuilder sql = new StringBuilder("SELECT * FROM ").append(tableName);
@@ -87,6 +87,12 @@ public class SQLBuilder {
                 conditionClauses.add(cond.getColumn() + " " + cond.getOperator() + " ?");
             }
             sql.append(String.join(" AND ", conditionClauses));
+        }
+        if (orderBy != null) {
+            sql.append(" ORDER BY ").append(orderBy);
+        }
+        if (limit != null) {
+            sql.append(" LIMIT ").append(limit);
         }
         return sql.toString();
     }
