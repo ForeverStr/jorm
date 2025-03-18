@@ -1,14 +1,30 @@
 package org.example.base;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.*;
+
 public abstract class BaseSession<T extends BaseSession<T>> implements AutoCloseable {
     protected Connection connection;
     protected boolean transactionActive = false;
+    private static final Logger log = LoggerFactory.getLogger(BaseSession.class);
 
-    // 子类需通过构造函数初始化 connection
+    // 子类需通过构造函数初始化父类的connection
     protected BaseSession(Connection connection) {
         this.connection = connection;
     }
+
+//    // 链式调用支持，where等
+//    public T rollback() {
+//        try {
+//            connection.rollback();
+//            transactionActive = false;
+//        } catch (SQLException e) {
+//            throw new RuntimeException("Rollback failed", e);
+//        }
+//        return self();
+//    }
 
     // 开启事务（返回当前对象以支持链式调用）
     public void beginTransaction() {
@@ -49,7 +65,7 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
                 }
                 connection.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                log.error("关闭连接时发生 SQL 异常", e);
             }
         }
     }

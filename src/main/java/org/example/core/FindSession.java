@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FindSession extends BaseSession<FindSession> {
-    private boolean transactionActive = false;
     private final List<Condition> conditions = new ArrayList<>(); // 存储查询条件
     private final List<Object> params = new ArrayList<>();        // 存储参数值
     private static final Logger log = LoggerFactory.getLogger(JormSession.class);
@@ -60,19 +59,6 @@ public class FindSession extends BaseSession<FindSession> {
             }
         } catch (SQLException | IllegalAccessException | InstantiationException e) {
             throw new RuntimeException("Query failed", e);
-        }
-    }
-
-    // 关闭连接
-    @Override
-    public void close() {
-        if (connection != null) {
-            try {
-                if (transactionActive) rollback();
-                connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
         }
     }
 
