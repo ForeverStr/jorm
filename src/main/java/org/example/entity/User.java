@@ -18,6 +18,9 @@ public class User {
     @Column
     private String status;
 
+    @Column
+    private String department;
+
     public User(String name, int age, String status){
         this.name = name;
         this.age = age;
@@ -57,5 +60,13 @@ public class User {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
     }
 }

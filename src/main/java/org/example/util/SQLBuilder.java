@@ -75,18 +75,24 @@ public class SQLBuilder {
         }
         return sql.toString();
     }
-    // 生成 SELECT SQL（例如：SELECT * FROM users WHERE user_name = ? AND age = ?）
-    public static String buildFindSelect(Class<?> clazz, List<Condition> conditions,Integer limit,String orderBy) {
+    // 生成 SELECT SQL 支持单表查询，条件，排序，条数限制，聚合函数。
+    public static String buildFindSelect(Class<?> clazz, List<Condition> conditions,Integer limit,String orderBy,
+                                         String group,String having,String selectClause) {
         Table table = clazz.getAnnotation(Table.class);
         String tableName = table != null && !table.name().isEmpty() ? table.name() : clazz.getSimpleName().toLowerCase();
-        StringBuilder sql = new StringBuilder("SELECT * FROM ").append(tableName);
-        if (!conditions.isEmpty()) {
+        StringBuilder sql = new StringBuilder("SELECT ").append(selectClause).append(" FROM ").append(tableName);        if (!conditions.isEmpty()) {
             sql.append(" WHERE ");
             List<String> conditionClauses = new ArrayList<>();
             for (Condition cond : conditions) {
                 conditionClauses.add(cond.getColumn() + " " + cond.getOperator() + " ?");
             }
             sql.append(String.join(" AND ", conditionClauses));
+        }
+        if (group != null) {
+            sql.append(" GROUP BY ").append(group);
+        }
+        if (having != null) {
+            sql.append(" HAVING ").append(having);
         }
         if (orderBy != null) {
             sql.append(" ORDER BY ").append(orderBy);

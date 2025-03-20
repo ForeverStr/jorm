@@ -1,7 +1,6 @@
 package org.example.test;
 
-import org.example.core.FindSession;
-import org.example.core.JormSession;
+import org.example.core.session.FindSession;
 import org.example.entity.User;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -23,15 +22,30 @@ public class FindTest {
             findSession.beginTransaction();
             try {
                 List<User> userList = findSession
-                        .where("user_name","Alice")
-                        .where("age","<",50)
-                        .orderBy("age")
-                        .limit(2)
-                        .find(User.class);
+                        .Where("user_name","Alice")
+                        .Where("age","<",50)
+                        .Order("age")
+                        .Limit(2)
+                        .Find(User.class);
                 findSession.commit();
                 assertNotNull(userList);
                 System.out.println(userList.get(0).getAge());
                 System.out.println(userList.get(1).getAge());
+            }catch (Exception e){
+                findSession.rollback();
+                throw new RuntimeException("查询失败",e);
+            }
+        }
+        try (FindSession findSession = new FindSession()) {
+            findSession.beginTransaction();
+            try {
+                List<User> userList = findSession
+                        .Select("department, SUM(age) as total_age")
+                        .Where("status","active")
+                        .Group("department")
+                        .Find(User.class);
+                findSession.commit();
+                assertNotNull(userList);
             }catch (Exception e){
                 findSession.rollback();
                 throw new RuntimeException("查询失败",e);
