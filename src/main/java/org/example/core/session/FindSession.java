@@ -1,8 +1,9 @@
 package org.example.core.session;
 
+import org.example.Enum.ErrorCode;
 import org.example.base.BaseSession;
 import org.example.core.DataSource;
-import org.example.core.JormSession;
+import org.example.core.JormException;
 import org.example.param.Condition;
 import org.example.util.ResultSetMapper;
 import org.example.util.SQLBuilder;
@@ -21,7 +22,7 @@ public class FindSession extends BaseSession<FindSession> {
     private String selectClause = "*"; // 默认 SELECT *
     private String orderBy;
     private Integer limit;
-    private static final Logger log = LoggerFactory.getLogger(JormSession.class);
+    private static final Logger log = LoggerFactory.getLogger(FindSession.class);
 
     public FindSession() {
         super(DataSource.getConnection());
@@ -79,7 +80,7 @@ public class FindSession extends BaseSession<FindSession> {
                 return ResultSetMapper.mapToList(rs,clazz);
             }
         } catch (SQLException | IllegalAccessException | InstantiationException e) {
-            throw new RuntimeException("Query failed", e);
+            throw new JormException(ErrorCode.QUERY_EXECUTION_FAILED, e);
         }
     }
 

@@ -1,5 +1,7 @@
 package org.example.base;
 
+import org.example.Enum.ErrorCode;
+import org.example.core.JormException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +34,7 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
             connection.setAutoCommit(false);
             transactionActive = true;
         } catch (SQLException e) {
-            throw new RuntimeException("Begin transaction failed", e);
+            throw new JormException(ErrorCode.TRANSACTION_FAILED, e);
         }
     }
 
@@ -42,7 +44,7 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
             connection.commit();
             transactionActive = false;
         } catch (SQLException e) {
-            throw new RuntimeException("Commit failed", e);
+            throw new JormException(ErrorCode.TRANSACTION_FAILED, e);
         }
     }
 
@@ -52,7 +54,7 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
             connection.rollback();
             transactionActive = false;
         } catch (SQLException e) {
-            throw new RuntimeException("Rollback failed", e);
+            throw new JormException(ErrorCode.TRANSACTION_FAILED, e);
         }
     }
 
@@ -61,11 +63,11 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
         if (connection != null) {
             try {
                 if (transactionActive) {
-                    rollback(); // 自动回滚未提交的事务
+                    rollback();
                 }
                 connection.close();
             } catch (SQLException e) {
-                log.error("关闭连接时发生 SQL 异常", e);
+                System.err.println(ErrorCode.CONNECTION_FAILED + e.getMessage());
             }
         }
     }

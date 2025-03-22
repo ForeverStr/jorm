@@ -1,5 +1,6 @@
 package org.example.util;
 
+import org.example.Enum.ErrorCode;
 import org.example.annotation.Table;
 import org.example.annotation.Column;
 import org.example.annotation.Id;
@@ -79,8 +80,10 @@ public class SQLBuilder {
     public static String buildFindSelect(Class<?> clazz, List<Condition> conditions,Integer limit,String orderBy,
                                          String group,String having,String selectClause) {
         Table table = clazz.getAnnotation(Table.class);
-        String tableName = table != null && !table.name().isEmpty() ? table.name() : clazz.getSimpleName().toLowerCase();
-        StringBuilder sql = new StringBuilder("SELECT ").append(selectClause).append(" FROM ").append(tableName);        if (!conditions.isEmpty()) {
+        AssertUtils.throwAway(table, ErrorCode.SQL_GENERATION_FAILED);
+        String tableName = !table.name().isEmpty() ? table.name() : clazz.getSimpleName().toLowerCase();
+        StringBuilder sql = new StringBuilder("SELECT ").append(selectClause).append(" FROM ").append(tableName);
+        if (!conditions.isEmpty()) {
             sql.append(" WHERE ");
             List<String> conditionClauses = new ArrayList<>();
             for (Condition cond : conditions) {
@@ -100,6 +103,7 @@ public class SQLBuilder {
         if (limit != null) {
             sql.append(" LIMIT ").append(limit);
         }
+        log.info("{}",sql);
         return sql.toString();
     }
     // 生成 UPDATE SQL（例如：UPDATE users SET username=?, age=? WHERE id=?）

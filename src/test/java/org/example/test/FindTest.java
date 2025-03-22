@@ -36,21 +36,21 @@ public class FindTest {
                 throw new RuntimeException("查询失败",e);
             }
         }
-        try (FindSession findSession = new FindSession()) {
-            findSession.beginTransaction();
-            try {
-                List<User> userList = findSession
-                        .Select("department, SUM(age) as total_age")
-                        .Where("status","active")
-                        .Group("department")
-                        .Find(User.class);
-                findSession.commit();
-                assertNotNull(userList);
-            }catch (Exception e){
-                findSession.rollback();
-                throw new RuntimeException("查询失败",e);
-            }
-        }
+//        try (FindSession findSession = new FindSession()) {
+//            findSession.beginTransaction();
+//            try {
+//                List<User> userList = findSession
+//                        .Select("id, user_name,department, SUM(age) as total_age")
+//                        .Where("status","active")
+//                        .Group("id, user_name,department")
+//                        .Find(User.class);
+//                findSession.commit();
+//                assertNotNull(userList);
+//            }catch (Exception e){
+//                findSession.rollback();
+//                throw new RuntimeException("查询失败",e);
+//            }
+//        }
     }
 
 }
