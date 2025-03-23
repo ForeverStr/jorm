@@ -67,15 +67,23 @@ public class FindSession extends BaseSession<FindSession> {
         this.orderBy = orderBy;
         return self();
     }
-    // 执行查询
+
+    /**
+     * 
+     * @param clazz
+     * @return List<T>
+     * @param <T>
+     */
     public <T> List<T> Find(Class<T> clazz) {
         try {
             String sql = SQLBuilder.buildFindSelect(clazz, conditions,limit,orderBy,group,having,selectClause);
+            log.info("查询语句1：{}",sql);
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 // 绑定参数
                 for (int i = 0; i < params.size(); i++) {
                     stmt.setObject(i + 1, params.get(i));
                 }
+                log.info("查询语句2：{}",stmt);
                 ResultSet rs = stmt.executeQuery();
                 return ResultSetMapper.mapToList(rs,clazz);
             }

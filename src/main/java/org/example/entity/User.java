@@ -3,6 +3,8 @@ package org.example.entity;
 import org.example.Enum.GenerationType;
 import org.example.annotation.*;
 
+import java.math.BigDecimal;
+
 @Table(name = "users")
 public class User {
     @Id
@@ -20,6 +22,8 @@ public class User {
 
     @Column
     private String department;
+    @Column(name = "total_age")
+    private int totalAge;
 
     public User(String name, int age, String status){
         this.name = name;
@@ -68,5 +72,13 @@ public class User {
 
     public void setDepartment(String department) {
         this.department = department;
+    }
+
+    public int getTotalAge() {
+        return totalAge;
+    }
+
+    public void setTotalAge(int totalAge) {
+        this.totalAge = totalAge;
     }
 }
