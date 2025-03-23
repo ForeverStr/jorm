@@ -14,15 +14,12 @@ public class User {
     @Column(name = "user_name")
     private String name;
 
-    @Column
     private int age;
 
-    @Column
     private String status;
 
-    @Column
     private String department;
-    @Column(name = "total_age")
+
     private int totalAge;
 
     public User(String name, int age, String status){

@@ -1,6 +1,7 @@
 package org.example.util;
 
 import org.example.Enum.ErrorCode;
+import org.example.Enum.TypeHandler;
 import org.example.annotation.Column;
 import org.example.core.JormException;
 import org.example.core.session.FindSession;
@@ -68,15 +69,13 @@ public class ResultSetMapper {
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
             Column column = field.getAnnotation(Column.class);
-            if (column != null) {
-                String columnName = !column.name().isEmpty() ? column.name() : field.getName();
-                // log.info("列名：{}",columnName);
-                // 检查列是否存在
-                if (columnNames.contains(columnName.toLowerCase())) {
-                    Object value = getValueByFieldType(rs,columnName,field.getType());
-                    if (value != null) {
-                        field.set(entity, value);
-                    }
+            String columnName = column == null ? field.getName()
+                    : (!column.name().isEmpty() ? column.name() : field.getName());
+            // log.info("列名：{}",columnName);
+            if (columnNames.contains(columnName.toLowerCase())) {
+                Object value = getValueByFieldType(rs,columnName,field.getType());
+                if (value != null) {
+                    field.set(entity, value);
                 }
             }
         }
@@ -86,28 +85,38 @@ public class ResultSetMapper {
      * 根据字段类型从 ResultSet 中获取值
      */
     private static Object getValueByFieldType(ResultSet rs, String columnName, Class<?> fieldType)
-            throws SQLException {
+            throws JormException {
         try {
-            if (fieldType == int.class || fieldType == Integer.class) {
-                int value = rs.getInt(columnName);
-                return rs.wasNull() ? (fieldType.isPrimitive() ? 0 : null) : value;
-            } else if (fieldType == long.class || fieldType == Long.class) {
-                long value = rs.getLong(columnName);
-                return rs.wasNull() ? (fieldType.isPrimitive() ? 0L : null) : value;
-            } else if (fieldType == String.class) {
-                return rs.getString(columnName);
-            } else if (fieldType == boolean.class || fieldType == Boolean.class) {
-                boolean value = rs.getBoolean(columnName);
-                return rs.wasNull() ? (fieldType.isPrimitive() ? false : null) : value;
+            TypeHandler handler = TypeHandler.forType(fieldType);
+            if (handler != null) {
+                return handler.handle(rs, columnName, fieldType);
             } else {
                 return rs.getObject(columnName);
             }
         } catch (SQLException e) {
             throw new JormException(
                     ErrorCode.TYPE_MISMATCH,
-                    "Column '" + columnName + "' cannot be converted to type " + fieldType.getName(),
+                    String.format("Column '%s' (SQL type: %s) cannot map to Java type %s",
+                            columnName,
+                            getColumnTypeName(rs, columnName),
+                            fieldType.getName()),
                     e
             );
+        }
+    }
+    /**
+     * 从 ResultSet 中获取指定列的 SQL 类型名称
+     * @param rs           ResultSet 对象
+     * @param columnName   数据库列名
+     * @return SQL 类型名称（如 "VARCHAR", "INT"），失败时返回 "UNKNOWN"
+     */
+    private static String getColumnTypeName(ResultSet rs, String columnName) {
+        try {
+            int columnIndex = rs.findColumn(columnName);
+            ResultSetMetaData metaData = rs.getMetaData();
+            return metaData.getColumnTypeName(columnIndex);
+        } catch (SQLException e) {
+            return "UNKNOWN";
         }
     }
 }

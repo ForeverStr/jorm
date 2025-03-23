@@ -15,35 +15,37 @@ public class FindTest {
 
     private static final Logger log = LoggerFactory.getLogger(SaveTest.class);
 
-    // 查询用户
+    // 单表查询操作
     @Test
     void testCrudOperations() {
-//        try (FindSession findSession = new FindSession()) {
-//            findSession.beginTransaction();
-//            try {
-//                List<User> userList = findSession
-//                        .Where("user_name","Alice")
-//                        .Where("age","<",50)
-//                        .Order("age")
-//                        .Limit(2)
-//                        .Find(User.class);
-//                findSession.commit();
-//                assertNotNull(userList);
-//                System.out.println(userList.get(0).getAge());
-//                System.out.println(userList.get(1).getAge());
-//            }catch (Exception e){
-//                findSession.rollback();
-//                throw new RuntimeException("查询失败",e);
-//            }
-//        }
+        //单表基础查询
         try (FindSession findSession = new FindSession()) {
             findSession.beginTransaction();
             try {
                 List<User> userList = findSession
-                        .Select("department,SUM(age) as total_age")
+                        .Where("user_name","Alice")
+                        .Where("age","<",50)
+                        .Order("age")
+                        .Limit(2)
+                        .Find(User.class);
+                findSession.commit();
+                assertNotNull(userList);
+                System.out.println(userList.get(0).getAge());
+                System.out.println(userList.get(1).getAge());
+            }catch (Exception e){
+                findSession.rollback();
+                throw new RuntimeException("查询失败",e);
+            }
+        }
+        //单表聚合函数查询
+        try (FindSession findSession = new FindSession()) {
+            findSession.beginTransaction();
+            try {
+                List<User> userList = findSession
+                        .Select("department,SUM(age) as totalAge")
                         .Where("status","active")
                         .Group("department")
-                        .Having("total_age > 200")
+                        .Having("totalAge > 200")
                         .Find(User.class);
                 findSession.commit();
                 assertNotNull(userList);
