@@ -16,6 +16,7 @@ import java.util.List;
 
 public class FindSession extends BaseSession<FindSession> {
     private final List<Condition> conditions = new ArrayList<>(); // 存储查询条件
+    private final List<Condition> havingConditions = new ArrayList<>();
     private final List<Object> params = new ArrayList<>();        // 存储参数值
     private String group;
     private String having;
@@ -34,8 +35,9 @@ public class FindSession extends BaseSession<FindSession> {
         return this;
     }
     //链式添加having条件
-    public FindSession Having(String having){
-        this.having = having;
+    public FindSession Having(String column, String operator, Object value) {
+        havingConditions.add(new Condition(column, operator, value));
+        params.add(value);
         return self();
     }
     //链式添加group条件
@@ -76,7 +78,7 @@ public class FindSession extends BaseSession<FindSession> {
      */
     public <T> List<T> Find(Class<T> clazz) {
         try {
-            String sql = SQLBuilder.buildFindSelect(clazz, conditions,limit,orderBy,group,having,selectClause);
+            String sql = SQLBuilder.buildFindSelect(clazz, conditions,limit,orderBy,group,havingConditions,selectClause);
             log.info("查询语句1：{}",sql);
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 // 绑定参数

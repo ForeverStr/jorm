@@ -42,10 +42,10 @@ public class FindTest {
             findSession.beginTransaction();
             try {
                 List<User> userList = findSession
-                        .Select("department,SUM(age) as totalAge")
+                        .Select("department, SUM(age) AS totalAge")
                         .Where("status","active")
                         .Group("department")
-                        .Having("totalAge > 200")
+                        .Having("totalAge", ">", 200)
                         .Find(User.class);
                 findSession.commit();
                 assertNotNull(userList);
