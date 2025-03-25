@@ -1,6 +1,6 @@
 package org.example.test;
 
-import org.example.core.session.FindSession;
+import org.example.session.FindSession;
 import org.example.entity.User;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -11,11 +11,14 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * 单表查询操作
+ * @author 杜玉杰
+ */
 public class FindTest {
 
     private static final Logger log = LoggerFactory.getLogger(SaveTest.class);
 
-    // 单表查询操作
     @Test
     void testCrudOperations() {
         //单表基础查询

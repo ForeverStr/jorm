@@ -3,8 +3,6 @@ package org.example.entity;
 import org.example.Enum.GenerationType;
 import org.example.annotation.*;
 
-import java.math.BigDecimal;
-
 @Table(name = "users")
 public class User {
     @Id
@@ -13,13 +11,9 @@ public class User {
 
     @Column(name = "user_name")
     private String name;
-
     private int age;
-
     private String status;
-
     private String department;
-
     private int totalAge;
 
     public User(String name, int age, String status){

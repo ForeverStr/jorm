@@ -1,7 +1,7 @@
 package org.example.base;
 
-import org.example.Enum.ErrorCode;
-import org.example.core.JormException;
+import org.example.exception.ErrorCode;
+import org.example.exception.JormException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

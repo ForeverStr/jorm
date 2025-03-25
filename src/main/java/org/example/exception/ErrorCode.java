@@ -1,5 +1,9 @@
-package org.example.Enum;
+package org.example.exception;
 
+/**
+ * 异常枚举类
+ * @author 杜玉杰
+ */
 public enum ErrorCode {
     CONNECTION_FAILED("ORM-001", "数据库连接失败"),
     SQL_GENERATION_FAILED("ORM-002", "SQL 生成失败"),

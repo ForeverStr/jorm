@@ -1,4 +1,4 @@
-package org.example.param;
+package org.example.dto;
 
 public class Condition {
 

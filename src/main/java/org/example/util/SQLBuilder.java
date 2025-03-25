@@ -1,12 +1,10 @@
 package org.example.util;
 
-import org.example.Enum.ErrorCode;
+import org.example.exception.ErrorCode;
 import org.example.annotation.Table;
 import org.example.annotation.Column;
-import org.example.annotation.Id;
-import org.example.annotation.GeneratedValue;
-import org.example.core.JormException;
-import org.example.param.Condition;
+import org.example.exception.JormException;
+import org.example.dto.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,16 +76,19 @@ public class SQLBuilder {
         }
         return sql.toString();
     }
-    // 生成 SELECT SQL 支持单表查询，条件，排序，条数限制，聚合函数。
-    public static String buildFindSelect(Class<?> clazz, List<Condition> conditions,Integer limit,String orderBy,
-                                         String group,List<Condition> havingConditions,String selectClause) {
+
+    /**
+     * 单表查询 支持多WHERE，LIMIT，ORDER BY，GROUP BY，HAVING，SELECT
+     */
+    public static String buildFindSelect(Class<?> clazz, List<Condition> conditions,
+                                         Integer limit,String orderBy,
+                                         String group,List<Condition> havingConditions,
+                                         String selectClause) {
         Table table = clazz.getAnnotation(Table.class);
         AssertUtils.throwAway(table, ErrorCode.SQL_GENERATION_FAILED);
         String tableName = !table.name().isEmpty() ? table.name() : clazz.getSimpleName().toLowerCase();
         List<String> validColumns = getValidColumns(clazz); // 通过反射获取有效列名
-        // 创建一个 HashSet 并添加元素
         Set<String> tempSet = new HashSet<>(Arrays.asList("=", ">", "<", ">=", "<=", "LIKE"));
-        // 将临时的 HashSet 转换为不可变的 Set
         Set<String> allowedOperators = Collections.unmodifiableSet(tempSet);
         for (Condition cond : conditions) {
             if (!validColumns.contains(cond.getColumn())) {
@@ -97,12 +98,11 @@ public class SQLBuilder {
                 throw new JormException(ErrorCode.INVALID_OPERATOR);
             }
         }
-        //校验Select子句：
+        //校验Select子句
         if (!selectClause.equals("*") && !selectClause.trim().isEmpty()) {
             String[] selectParts = selectClause.split(",");
             for (String part : selectParts) {
                 part = part.trim();
-                // 匹配列名或聚合函数（如SUM(age)）
                 if (!part.matches("[a-zA-Z_]+(\\s+AS\\s+[a-zA-Z_]+)?|([A-Z]+)\\([a-zA-Z_]+\\)(\\s+AS\\s+[a-zA-Z_]+)?")) {
                     throw new JormException(ErrorCode.INVALID_SELECT_CLAUSE);
                 }
@@ -110,7 +110,6 @@ public class SQLBuilder {
         }
         StringBuilder sql = new StringBuilder("SELECT ").append(selectClause).append(" FROM ")
                 .append(tableName);
-
         if (!conditions.isEmpty()) {
             sql.append(" WHERE ");
             List<String> conditionClauses = new ArrayList<>();

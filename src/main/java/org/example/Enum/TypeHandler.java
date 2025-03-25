@@ -5,6 +5,10 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 类型处理器
+ * @author 杜玉杰
+ */
 public enum TypeHandler {
     INTEGER(int.class, Integer.class) {
         @Override Object getValue(ResultSet rs, String col) throws SQLException { return rs.getInt(col); }

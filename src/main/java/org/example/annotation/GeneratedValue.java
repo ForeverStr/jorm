@@ -7,7 +7,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-// @GeneratedValue 注解（主键生成策略）
+/**
+ * GeneratedValue 注解（用于定义主键生成策略）
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface GeneratedValue {

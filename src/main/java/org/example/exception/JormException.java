@@ -1,9 +1,8 @@
-package org.example.core;
-
-import org.example.Enum.ErrorCode;
+package org.example.exception;
 
 /**
  * JORM 框架统一异常，封装所有数据库操作相关的错误
+ * @author 杜玉杰
  */
 public class JormException extends RuntimeException {
     private final ErrorCode errorCode;

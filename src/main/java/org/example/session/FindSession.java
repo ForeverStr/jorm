@@ -1,10 +1,10 @@
-package org.example.core.session;
+package org.example.session;
 
-import org.example.Enum.ErrorCode;
+import org.example.exception.ErrorCode;
 import org.example.base.BaseSession;
 import org.example.core.DataSource;
-import org.example.core.JormException;
-import org.example.param.Condition;
+import org.example.exception.JormException;
+import org.example.dto.Condition;
 import org.example.util.ResultSetMapper;
 import org.example.util.SQLBuilder;
 import org.slf4j.Logger;
@@ -15,12 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FindSession extends BaseSession<FindSession> {
-    private final List<Condition> conditions = new ArrayList<>(); // 存储查询条件
+    private final List<Condition> conditions = new ArrayList<>();
     private final List<Condition> havingConditions = new ArrayList<>();
-    private final List<Object> params = new ArrayList<>();        // 存储参数值
+    private final List<Object> params = new ArrayList<>();
     private String group;
     private String having;
-    private String selectClause = "*"; // 默认 SELECT *
+    private String selectClause = "*";
     private String orderBy;
     private Integer limit;
     private static final Logger log = LoggerFactory.getLogger(FindSession.class);
@@ -29,59 +29,66 @@ public class FindSession extends BaseSession<FindSession> {
         super(DataSource.getConnection());
     }
 
-    // 设置 SELECT 子句（支持聚合函数）
+    /**
+     * 设置 SELECT 子句（支持聚合函数）
+     */
     public FindSession Select(String selectClause) {
         this.selectClause = selectClause;
         return this;
     }
-    //链式添加having条件
+    /**
+     * 链式添加having条件
+     */
     public FindSession Having(String column, String operator, Object value) {
         havingConditions.add(new Condition(column, operator, value));
         params.add(value);
         return self();
     }
-    //链式添加group条件
+    /**
+     * 链式添加group条件
+     */
     public FindSession Group(String group){
         this.group = group;
         return self();
     }
-    // 链式添加等值条件（如 where("user_name", "admin") → user_name = ?）
+    /**
+     * 链式添加等值条件
+     */
     public FindSession Where(String column, Object value) {
         conditions.add(new Condition(column, "=", value));
         params.add(value);
         return self();
     }
-
-    // 链式添加带操作符的条件（如 where("age", ">", 20)）
+    /**
+     * 链式添加带操作符的条件
+     */
     public FindSession Where(String column, String operator, Object value) {
         conditions.add(new Condition(column, operator, value));
         params.add(value);
         return self();
     }
-
-    //链式添加limit限制条件
+    /**
+     * 链式添加limit限制条件
+     */
     public FindSession Limit(Integer limit){
         this.limit = limit;
         return self();
     }
-
+    /**
+     * 链式添加order by条件
+     */
     public FindSession Order(String orderBy){
         this.orderBy = orderBy;
         return self();
     }
-
     /**
-     * 
-     * @param clazz
-     * @return List<T>
-     * @param <T>
+     * 执行查询
      */
     public <T> List<T> Find(Class<T> clazz) {
         try {
             String sql = SQLBuilder.buildFindSelect(clazz, conditions,limit,orderBy,group,havingConditions,selectClause);
             log.info("查询语句1：{}",sql);
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-                // 绑定参数
                 for (int i = 0; i < params.size(); i++) {
                     stmt.setObject(i + 1, params.get(i));
                 }

@@ -1,10 +1,9 @@
 package org.example.util;
 
-import org.example.Enum.ErrorCode;
+import org.example.exception.ErrorCode;
 import org.example.Enum.TypeHandler;
 import org.example.annotation.Column;
-import org.example.core.JormException;
-import org.example.core.session.FindSession;
+import org.example.exception.JormException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,31 +19,11 @@ import java.util.Set;
 public class ResultSetMapper {
     private static final Logger log = LoggerFactory.getLogger(ResultSetMapper.class);
 
-    /**
-     *
-     * @param rs
-     * @param clazz
-     * @return T
-     * @param <T>
-     * @throws SQLException
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     */
     public static <T> T mapToEntity(ResultSet rs, Class<T> clazz)
             throws SQLException, IllegalAccessException, InstantiationException {
         if (!rs.next()) return null;
         return mapRowToEntity(rs, clazz);
     }
-
-    /**
-     * @param rs
-     * @param clazz
-     * @return List<T>
-     * @param <T>
-     * @throws SQLException
-     * @throws IllegalAccessException
-     * @throws InstantiationException
-     */
     public static <T> List<T> mapToList(ResultSet rs, Class<T> clazz)
             throws SQLException, IllegalAccessException, InstantiationException {
         List<T> list = new ArrayList<>();
@@ -106,9 +85,6 @@ public class ResultSetMapper {
     }
     /**
      * 从 ResultSet 中获取指定列的 SQL 类型名称
-     * @param rs           ResultSet 对象
-     * @param columnName   数据库列名
-     * @return SQL 类型名称（如 "VARCHAR", "INT"），失败时返回 "UNKNOWN"
      */
     private static String getColumnTypeName(ResultSet rs, String columnName) {
         try {

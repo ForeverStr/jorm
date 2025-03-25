@@ -1,17 +1,15 @@
 package org.example.util;
 
-import org.example.Enum.ErrorCode;
-import org.example.core.JormException;
-
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class SessionHelper {
 
-    // 工具方法：设置自增主键值
+    /**
+     * 设置自增主键值
+     */
     public static <T> void setIdValue(T entity, Object idValue) throws IllegalAccessException {
         Field idField = EntityHelper.getIdField(entity.getClass());
         if (idField != null) {
@@ -25,7 +23,9 @@ public class SessionHelper {
         }
     }
 
-    // 工具方法：设置 INSERT 参数
+    /**
+     * 设置 INSERT 参数
+     */
     public static <T> void setInsertParameters(PreparedStatement stmt, T entity)
             throws SQLException, IllegalAccessException {
         Class<?> clazz = entity.getClass();
