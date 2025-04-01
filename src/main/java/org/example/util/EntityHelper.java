@@ -1,5 +1,6 @@
 package org.example.util;
 
+import org.example.annotation.Aggregation;
 import org.example.annotation.Column;
 import org.example.annotation.GeneratedValue;
 import org.example.Enum.GenerationType;
@@ -10,7 +11,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 public class EntityHelper {
     /**
-     * 获取需要插入的字段（排除自增主键）
+     * 获取需要插入的字段（排除自增主键和聚合字段）
      */
     public static List<Field> getInsertableFields(Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredFields())
@@ -19,7 +20,7 @@ public class EntityHelper {
                         GeneratedValue generatedValue = f.getAnnotation(GeneratedValue.class);
                         return generatedValue == null || generatedValue.strategy() != GenerationType.IDENTITY;
                     }
-                    return true;
+                    return !f.isAnnotationPresent(Aggregation.class);
                 })
                 .collect(Collectors.toList());
     }

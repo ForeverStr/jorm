@@ -28,7 +28,7 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
 //        return self();
 //    }
 
-    // 开启事务（返回当前对象以支持链式调用）
+    // 开启事务
     public void beginTransaction() {
         try {
             connection.setAutoCommit(false);

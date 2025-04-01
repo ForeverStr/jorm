@@ -2,7 +2,7 @@ package org.example.query;
 
 import org.example.core.JormSession;
 import org.example.util.ResultSetMapper;
-import org.example.util.SQLBuilder;
+import org.example.core.SQLBuilder;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

@@ -14,6 +14,8 @@ public class User {
     private int age;
     private String status;
     private String department;
+
+    @Aggregation
     private int totalAge;
 
     public User(String name, int age, String status){

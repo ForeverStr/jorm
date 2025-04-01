@@ -1,8 +1,8 @@
 package org.example.core;
 
 import org.example.annotation.*;
+import org.example.sqlBuilder.SaveBuilder;
 import org.example.util.EntityHelper;
-import org.example.util.SQLBuilder;
 import org.example.util.SessionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,27 +56,6 @@ public class JormSession implements AutoCloseable {
         }
     }
 
-    // 保存实体（INSERT）
-    public <T> void save(T entity) {
-        try {
-            String sql = SQLBuilder.buildInsert(entity.getClass());
-            log.info("预编译前的sql：{}",sql);
-            //PreparedStatement预编译sql语句，提高性能，后续的set方法明确sql语句的结构和参数值，避免sql注入，还可以自动获取主键值
-            try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS))
-            {
-                log.info("预编译后的sql：{}",stmt);
-                SessionHelper.setInsertParameters(stmt, entity);
-                stmt.executeUpdate();
-                // 处理自增主键,ResultSet数据库查询结果集
-                ResultSet rs = stmt.getGeneratedKeys();
-                if (rs.next()) {
-                    SessionHelper.setIdValue(entity, rs.getLong(1));
-                }
-            }
-        } catch (SQLException | IllegalAccessException e) {
-            throw new RuntimeException("Save failed", e);
-        }
-    }
 
     // 更新实体（根据 ID）
     public <T> void update(T entity) {
@@ -107,7 +86,7 @@ public class JormSession implements AutoCloseable {
 
     // 批量插入（返回生成的主键列表）
     public <T> List<Long> batchSave(List<T> entities) {
-        log.debug("批量插入 SQL: {}", SQLBuilder.buildInsert(entities.get(0).getClass()));
+        log.debug("批量插入 SQL: {}", SaveBuilder.buildInsert(entities.get(0).getClass()));
         //非空逻辑校验
         for (T entity : entities) {
             validateEntity(entity);
@@ -115,7 +94,7 @@ public class JormSession implements AutoCloseable {
         if (entities.isEmpty()) return Collections.emptyList();
 
         try {
-            String sql = SQLBuilder.buildInsert(entities.get(0).getClass());
+            String sql = SaveBuilder.buildInsert(entities.get(0).getClass());
             try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 for (T entity : entities) {
                     SessionHelper.setInsertParameters(stmt, entity);

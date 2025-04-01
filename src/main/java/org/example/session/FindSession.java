@@ -5,8 +5,8 @@ import org.example.base.BaseSession;
 import org.example.core.DataSource;
 import org.example.exception.JormException;
 import org.example.dto.Condition;
+import org.example.sqlBuilder.FindBuilder;
 import org.example.util.ResultSetMapper;
-import org.example.util.SQLBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,6 @@ public class FindSession extends BaseSession<FindSession> {
     private final List<Condition> havingConditions = new ArrayList<>();
     private final List<Object> params = new ArrayList<>();
     private String group;
-    private String having;
     private String selectClause = "*";
     private String orderBy;
     private Integer limit;
@@ -86,7 +85,7 @@ public class FindSession extends BaseSession<FindSession> {
      */
     public <T> List<T> Find(Class<T> clazz) {
         try {
-            String sql = SQLBuilder.buildFindSelect(clazz, conditions,limit,orderBy,group,havingConditions,selectClause);
+            String sql = FindBuilder.buildFindSelect(clazz, conditions,limit,orderBy,group,havingConditions,selectClause);
             log.info("查询语句1：{}",sql);
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 for (int i = 0; i < params.size(); i++) {
