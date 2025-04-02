@@ -2,6 +2,9 @@ package org.example.core;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.example.exception.ErrorCode;
+import org.example.exception.JormException;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 public class DataSource {
@@ -12,7 +15,7 @@ public class DataSource {
         config.setJdbcUrl("jdbc:mysql://localhost:3306/orm?characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai");
         config.setUsername("root");
         config.setPassword("root");
-        config.setDriverClassName("com.mysql.cj.jdbc.Driver"); // 必须指定驱动类
+        config.setDriverClassName("com.mysql.cj.jdbc.Driver");
         dataSource = new HikariDataSource(config);
     }
 
@@ -20,7 +23,7 @@ public class DataSource {
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {
-            throw new RuntimeException("连接失败", e);
+            throw new JormException(ErrorCode.CONNECTION_ERROR, e);
         }
     }
 }

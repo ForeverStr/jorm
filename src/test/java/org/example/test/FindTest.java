@@ -40,6 +40,9 @@ public class FindTest {
                 throw new RuntimeException("查询失败",e);
             }
         }
+    }
+    @Test
+    void testFindByAggregation() {
         //单表聚合函数查询
         try (FindSession findSession = new FindSession()) {
             findSession.beginTransaction();

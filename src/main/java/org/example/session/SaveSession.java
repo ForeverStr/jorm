@@ -10,11 +10,16 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 
 public class SaveSession extends BaseSession<SaveSession> {
-
     private static final Logger log = LoggerFactory.getLogger(SaveSession.class);
+
+    // 自动事务模式
     public SaveSession() {
-        super(DataSource.getConnection());
-        beginTransaction();
+        super();
+    }
+
+    // 显示事务模式
+    public SaveSession(Connection externalConn) {
+        super(externalConn);
     }
 
     public <T> void save(T entity) {
@@ -32,7 +37,6 @@ public class SaveSession extends BaseSession<SaveSession> {
                 }
             }
         } catch (SQLException | IllegalAccessException e) {
-            markError();
             throw new RuntimeException("Save failed", e);
         }
     }

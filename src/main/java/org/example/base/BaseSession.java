@@ -1,5 +1,6 @@
 package org.example.base;
 
+import org.example.core.DataSource;
 import org.example.exception.ErrorCode;
 import org.example.exception.JormException;
 import org.slf4j.Logger;
@@ -9,68 +10,84 @@ import java.sql.*;
 
 public abstract class BaseSession<T extends BaseSession<T>> implements AutoCloseable {
     protected Connection connection;
-    protected boolean transactionActive = false;
-    protected boolean hasError = false;
+    protected boolean isManagedConnection; // 标记连接是否由Session管理
     private static final Logger log = LoggerFactory.getLogger(BaseSession.class);
 
-    // 子类需通过构造函数初始化父类的connection
+    // 支持显示事务
     protected BaseSession(Connection connection) {
         this.connection = connection;
+        this.isManagedConnection = false;
     }
 
-    //标记是否需要回滚
-    protected void markError(){
-        this.hasError = true;
+    // 支持自动事务
+    protected BaseSession() {
+        this(DataSource.getConnection());
+        this.isManagedConnection = true;
+        try {
+            this.connection.setAutoCommit(true);
+        } catch (SQLException e) {
+            throw new JormException(ErrorCode.CONNECTION_ERROR, e);
+        }
     }
 
-    // 开启事务
+    // 用于显示开启事务
     public void beginTransaction() {
         try {
-            connection.setAutoCommit(false);
-            transactionActive = true;
+            if (connection.getAutoCommit()) {
+                connection.setAutoCommit(false);
+            } else {
+                throw new JormException(ErrorCode.TRANSACTION_ALREADY_ACTIVE);
+            }
         } catch (SQLException e) {
             throw new JormException(ErrorCode.TRANSACTION_FAILED, e);
         }
     }
 
-    // 提交事务
+    // 用于显示提交事务
     public void commit() {
         try {
-            connection.commit();
-            transactionActive = false;
+            //检查事务提交状态
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+                connection.setAutoCommit(true);
+            }
         } catch (SQLException e) {
-            throw new JormException(ErrorCode.TRANSACTION_FAILED, e);
+            throw new JormException(ErrorCode.COMMIT_FAILED, e);
         }
     }
 
-    // 回滚事务
+    // 用于显示回滚事务
     public void rollback() {
         try {
-            connection.rollback();
-            transactionActive = false;
+            if (!connection.getAutoCommit()) {
+                connection.rollback();
+                connection.setAutoCommit(true);
+            }
         } catch (SQLException e) {
-            throw new JormException(ErrorCode.TRANSACTION_FAILED, e);
+            throw new JormException(ErrorCode.ROLLBACK_FAILED, e);
         }
     }
 
     @Override
     public void close() {
-        if (connection != null) {
+        if (isManagedConnection && connection != null) {
             try {
-                if (transactionActive) {
-                    if (hasError) {
-                        connection.rollback();
-                    } else {
-                        connection.commit();
-                    }
+                if (!connection.getAutoCommit()) {
+                    log.warn("未提交的事务连接被关闭，自动回滚");
+                    connection.rollback();
                 }
                 connection.close();
             } catch (SQLException e) {
-                System.err.println(ErrorCode.CONNECTION_FAILED + e.getMessage());
+                log.error("关闭连接失败", e);
             }
         }
     }
-    //    // 链式调用支持，where等
+    // 获取原生连接（用于嵌套操作）
+    public Connection getNativeConnection() {
+        return connection;
+    }
+    // 抽象方法：返回当前对象的引用（子类需实现）
+    protected abstract T self();
 //    public T rollback() {
 //        try {
 //            connection.rollback();
@@ -80,6 +97,4 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
 //        }
 //        return self();
 //    }
-    // 抽象方法：返回当前对象的引用（子类需实现）
-    protected abstract T self();
 }

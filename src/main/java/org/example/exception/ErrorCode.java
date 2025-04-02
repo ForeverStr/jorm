@@ -15,7 +15,13 @@ public enum ErrorCode {
     INVALID_COLUMN("ORM-008","当前列无效" ),
     INVALID_OPERATOR("ORM-009", "操作符无效"),
     INVALID_ORDER_DIRECTION("ORM-0010","排序方向无效"),
-    INVALID_SELECT_CLAUSE("ORM-0011", "无效的 SELECT 子句");
+    INVALID_SELECT_CLAUSE("ORM-0011", "无效的 SELECT 子句"),
+    CONNECTION_ERROR("ORM-0012", "数据库连接错误"),
+    TRANSACTION_ALREADY_ACTIVE("ORM-0013","事务已经处于活动状态" ),
+    COMMIT_FAILED("ORM-0014","提交事务失败" ),
+    ROLLBACK_FAILED("ORM-0015","回滚事务失败" ),
+    NESTED_TRANSACTION_NOT_SUPPORTED("ORM-0016","嵌套事务不支持" ),
+    NO_ACTIVE_TRANSACTION("ORM-0017","没有活动事务" );
 
     private final String code;
     private final String message;
