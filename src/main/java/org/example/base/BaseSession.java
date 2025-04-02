@@ -10,6 +10,7 @@ import java.sql.*;
 public abstract class BaseSession<T extends BaseSession<T>> implements AutoCloseable {
     protected Connection connection;
     protected boolean transactionActive = false;
+    protected boolean hasError = false;
     private static final Logger log = LoggerFactory.getLogger(BaseSession.class);
 
     // 子类需通过构造函数初始化父类的connection
@@ -17,16 +18,10 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
         this.connection = connection;
     }
 
-//    // 链式调用支持，where等
-//    public T rollback() {
-//        try {
-//            connection.rollback();
-//            transactionActive = false;
-//        } catch (SQLException e) {
-//            throw new RuntimeException("Rollback failed", e);
-//        }
-//        return self();
-//    }
+    //标记是否需要回滚
+    protected void markError(){
+        this.hasError = true;
+    }
 
     // 开启事务
     public void beginTransaction() {
@@ -63,7 +58,11 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
         if (connection != null) {
             try {
                 if (transactionActive) {
-                    rollback();
+                    if (hasError) {
+                        connection.rollback();
+                    } else {
+                        connection.commit();
+                    }
                 }
                 connection.close();
             } catch (SQLException e) {
@@ -71,7 +70,16 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
             }
         }
     }
-
+    //    // 链式调用支持，where等
+//    public T rollback() {
+//        try {
+//            connection.rollback();
+//            transactionActive = false;
+//        } catch (SQLException e) {
+//            throw new RuntimeException("Rollback failed", e);
+//        }
+//        return self();
+//    }
     // 抽象方法：返回当前对象的引用（子类需实现）
     protected abstract T self();
 }

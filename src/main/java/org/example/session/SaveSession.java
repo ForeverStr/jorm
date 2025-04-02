@@ -14,6 +14,7 @@ public class SaveSession extends BaseSession<SaveSession> {
     private static final Logger log = LoggerFactory.getLogger(SaveSession.class);
     public SaveSession() {
         super(DataSource.getConnection());
+        beginTransaction();
     }
 
     public <T> void save(T entity) {
@@ -31,6 +32,7 @@ public class SaveSession extends BaseSession<SaveSession> {
                 }
             }
         } catch (SQLException | IllegalAccessException e) {
+            markError();
             throw new RuntimeException("Save failed", e);
         }
     }
