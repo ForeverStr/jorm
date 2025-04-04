@@ -7,10 +7,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public abstract class BaseSession<T extends BaseSession<T>> implements AutoCloseable {
     protected Connection connection;
     protected boolean isManagedConnection; // 标记连接是否由Session管理
+    private Deque<Savepoint> savepoints = new ArrayDeque<>();
     private static final Logger log = LoggerFactory.getLogger(BaseSession.class);
 
     // 支持显示事务
@@ -80,6 +83,27 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
             } catch (SQLException e) {
                 log.error("关闭连接失败", e);
             }
+        }
+    }
+    // 用于显示创建保存点
+    public void createSavepoint(String name) {
+        try {
+            Savepoint sp = connection.setSavepoint(name);
+            savepoints.push(sp);
+        } catch (SQLException e) {
+            throw new JormException(ErrorCode.SAVEPOINT_FAILED, e);
+        }
+    }
+    // 用于显示回滚到保存点
+    public void rollbackToSavepoint(String name) {
+        if (savepoints.isEmpty()) {
+            throw new JormException(ErrorCode.NO_SAVEPOINT);
+        }
+        Savepoint sp = savepoints.pop();
+        try {
+            connection.rollback(sp);
+        } catch (SQLException e) {
+            throw new JormException(ErrorCode.ROLLBACK_FAILED, e);
         }
     }
     // 获取原生连接（用于嵌套操作）

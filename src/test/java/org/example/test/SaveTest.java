@@ -1,6 +1,6 @@
 package org.example.test;
 
-import org.example.core.JormSession;
+import org.example.core.Closure;
 import org.example.core.TransactionManager;
 import org.example.entity.User;
 import org.example.session.SaveSession;
@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SaveTest {
     //保存测试
@@ -36,6 +35,15 @@ public class SaveTest {
             TransactionManager.rollback();
             throw e;
         }
+    }
+    //闭包事务实现
+    @Test
+    void testClosureTransaction() {
+        User user1 = new User();
+        user1.setName("自动提交测试1");
+        Closure.transaction(conn -> {
+            new SaveSession(conn).save(user1);
+        });
     }
 
 }

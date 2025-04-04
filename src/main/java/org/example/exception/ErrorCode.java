@@ -21,7 +21,9 @@ public enum ErrorCode {
     COMMIT_FAILED("ORM-0014","提交事务失败" ),
     ROLLBACK_FAILED("ORM-0015","回滚事务失败" ),
     NESTED_TRANSACTION_NOT_SUPPORTED("ORM-0016","嵌套事务不支持" ),
-    NO_ACTIVE_TRANSACTION("ORM-0017","没有活动事务" );
+    NO_ACTIVE_TRANSACTION("ORM-0017","没有活动事务" ),
+    SAVEPOINT_FAILED("ORM-0018","创建保存点失败" ),
+    NO_SAVEPOINT("ORM-0019","没有保存点" );
 
     private final String code;
     private final String message;
