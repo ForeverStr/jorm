@@ -6,8 +6,11 @@ import org.example.exception.JormException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/**
+ * 事务管理器
+ */
 public class TransactionManager {
-    // 事务连接持有器（ThreadLocal保证线程安全）
+    // ThreadLocal保证线程安全
     private static final ThreadLocal<Connection> transactionConnectionHolder = new ThreadLocal<>();
 
     // 开启事务并返回连接

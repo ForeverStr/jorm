@@ -8,7 +8,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-
+/**
+ * 必须通过 try-with-resources 使用本类，例如：
+ * try (SaveSession session = new SaveSession()) {
+ *     session.save(entity);
+ * }
+ */
 public class SaveSession extends BaseSession<SaveSession> {
     private static final Logger log = LoggerFactory.getLogger(SaveSession.class);
 

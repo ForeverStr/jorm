@@ -33,44 +33,6 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
         }
     }
 
-    // 用于显示开启事务
-    public void beginTransaction() {
-        try {
-            if (connection.getAutoCommit()) {
-                connection.setAutoCommit(false);
-            } else {
-                throw new JormException(ErrorCode.TRANSACTION_ALREADY_ACTIVE);
-            }
-        } catch (SQLException e) {
-            throw new JormException(ErrorCode.TRANSACTION_FAILED, e);
-        }
-    }
-
-    // 用于显示提交事务
-    public void commit() {
-        try {
-            //检查事务提交状态
-            if (!connection.getAutoCommit()) {
-                connection.commit();
-                connection.setAutoCommit(true);
-            }
-        } catch (SQLException e) {
-            throw new JormException(ErrorCode.COMMIT_FAILED, e);
-        }
-    }
-
-    // 用于显示回滚事务
-    public void rollback() {
-        try {
-            if (!connection.getAutoCommit()) {
-                connection.rollback();
-                connection.setAutoCommit(true);
-            }
-        } catch (SQLException e) {
-            throw new JormException(ErrorCode.ROLLBACK_FAILED, e);
-        }
-    }
-
     @Override
     public void close() {
         if (isManagedConnection && connection != null) {
