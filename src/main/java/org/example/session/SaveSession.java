@@ -28,6 +28,7 @@ public class SaveSession extends BaseSession<SaveSession> {
     }
 
     public <T> void save(T entity) {
+        checkIfClosed();
         try {
             String sql = SaveBuilder.buildInsert(entity.getClass());
             log.info("预编译前的sql：{}",sql);

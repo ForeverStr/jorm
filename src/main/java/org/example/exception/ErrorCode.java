@@ -23,8 +23,9 @@ public enum ErrorCode {
     NESTED_TRANSACTION_NOT_SUPPORTED("ORM-0016","嵌套事务不支持" ),
     NO_ACTIVE_TRANSACTION("ORM-0017","没有活动事务" ),
     SAVEPOINT_FAILED("ORM-0018","创建保存点失败" ),
-    NO_SAVEPOINT("ORM-0019","没有保存点" );
-
+    NO_SAVEPOINT("ORM-0019","没有保存点" ),
+    SESSION_CLOSED("ORM-0020","会话已关闭" ),
+    DUPLICATE_SAVEPOINT_NAME("ORM-0021","保存点名称重复" );
     private final String code;
     private final String message;
     ErrorCode(String code, String message) {
