@@ -1,5 +1,6 @@
 package org.example.base;
 
+import org.example.annotation.RequireTryWithResources;
 import org.example.core.DataSource;
 import org.example.exception.ErrorCode;
 import org.example.exception.JormException;
@@ -9,23 +10,17 @@ import org.slf4j.LoggerFactory;
 import java.lang.ref.Cleaner;
 import java.sql.*;
 import java.util.*;
-
+@RequireTryWithResources
 public abstract class BaseSession<T extends BaseSession<T>> implements AutoCloseable {
     protected Connection connection;
-    protected boolean isManagedConnection; // 标记连接是否由Session管理
+    protected boolean isManagedConnection;
     private final Map<String, Savepoint> savepoints = new LinkedHashMap<>();
     private static final Logger log = LoggerFactory.getLogger(BaseSession.class);
-
-    // 支持显示事务
-    // 使用 Cleaner 检测未关闭的实例
-    private static final Cleaner SESSION_CLEANER = Cleaner.create();
-    private final Cleaner.Cleanable cleanable;
-    private static volatile boolean closed = false;
+    private volatile boolean closed = false;
 
     protected BaseSession(Connection connection) {
         this.connection = connection;
         this.isManagedConnection = false;
-        this.cleanable = SESSION_CLEANER.register(this, new CleanupAction(this.connection, this.isManagedConnection));
     }
 
     // 支持自动事务
@@ -51,7 +46,6 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
     public void close() {
         if (!closed){
             closed = true;
-            cleanable.clean();
             if (isManagedConnection && connection != null) {
                 try {
                     if (!connection.getAutoCommit()) {
@@ -65,7 +59,6 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
             }
         }
     }
-    // 用于显示创建保存点
     public void createSavepoint(String name) {
         if (savepoints.containsKey(name)) {
             throw new JormException(ErrorCode.DUPLICATE_SAVEPOINT_NAME);
@@ -77,7 +70,6 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
             throw new JormException(ErrorCode.SAVEPOINT_FAILED, "保存点创建失败: " + name, e);
         }
     }
-    // 用于显示回滚到保存点
     public void rollbackToSavepoint(String name) {
         Savepoint sp = savepoints.get(name);
         if (sp == null) {
@@ -98,35 +90,8 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
         }
     }
 
-    // 获取原生连接（用于嵌套操作）
     public Connection getNativeConnection() {
         return connection;
-    }
-
-    // 清理动作：当 Session 未被正确关闭时触发警告
-    private static class CleanupAction implements Runnable {
-        private final Connection connection;
-        private final boolean isManagedConnection;
-
-        CleanupAction(Connection connection, boolean isManagedConnection) {
-            this.connection = connection;
-            this.isManagedConnection = isManagedConnection;
-        }
-
-        @Override
-        public void run() {
-            if (isManagedConnection && connection != null) {
-                // 记录严重错误（实际项目可通过日志框架输出）
-                System.err.println("严重警告: 未使用 try-with-resources 关闭 Session！可能导致连接泄漏！");
-                try {
-                    if (!connection.isClosed()) {
-                        connection.close(); // 强制关闭连接
-                    }
-                } catch (SQLException e) {
-                    System.err.println("清理时关闭连接失败: " + e.getMessage());
-                }
-            }
-        }
     }
 }
 

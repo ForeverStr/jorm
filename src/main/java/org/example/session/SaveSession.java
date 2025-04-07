@@ -1,5 +1,6 @@
 package org.example.session;
 
+import org.example.annotation.RequireTryWithResources;
 import org.example.base.BaseSession;
 import org.example.core.DataSource;
 import org.example.sqlBuilder.SaveBuilder;
@@ -14,6 +15,7 @@ import java.sql.*;
  *     session.save(entity);
  * }
  */
+@RequireTryWithResources
 public class SaveSession extends BaseSession<SaveSession> {
     private static final Logger log = LoggerFactory.getLogger(SaveSession.class);
 

@@ -1,0 +1,6 @@
+<module name="Checker">
+    <property name="charset" value="UTF-8"/>
+    <module name="TreeWalker">
+        <module name="org.example.core.RequireTryWithResourcesCheck"/>
+    </module>
+</module>
