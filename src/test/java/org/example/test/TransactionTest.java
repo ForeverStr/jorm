@@ -14,13 +14,12 @@ public class TransactionTest {
     //自动事务测试
     @Test
     void AutomaticTransactionTest() {
-//        try (SaveSession session = new SaveSession()) {
-//            User user = new User();
-//            user.setName("自动提交测试");
-//            session.save(user);
-//            Assertions.assertNotNull(user.getId());
-//        }
-        new SaveSession();
+        try (SaveSession session = new SaveSession()) {
+            User user = new User();
+            user.setName("自动提交测试");
+            session.save(user);
+            Assertions.assertNotNull(user.getId());
+        }
     }
 
     //手动事务测试
@@ -37,7 +36,7 @@ public class TransactionTest {
         }
     }
 
-    //闭包事务测试；闭包事务测试
+    //闭包事务测试；嵌套事务测试
     @Test
     void  DeclarativeTransactionTest() {
         User user1 = new User("闭包事务测试1", 23, "active");

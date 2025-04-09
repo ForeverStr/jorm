@@ -1,16 +1,13 @@
 package org.example.base;
 
-import org.example.annotation.RequireTryWithResources;
 import org.example.core.DataSource;
 import org.example.exception.ErrorCode;
 import org.example.exception.JormException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.ref.Cleaner;
 import java.sql.*;
 import java.util.*;
-@RequireTryWithResources
 public abstract class BaseSession<T extends BaseSession<T>> implements AutoCloseable {
     protected Connection connection;
     protected boolean isManagedConnection;
@@ -94,13 +91,3 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
         return connection;
     }
 }
-
-//    public T rollback() {
-//        try {
-//            connection.rollback();
-//            transactionActive = false;
-//        } catch (SQLException e) {
-//            throw new RuntimeException("Rollback failed", e);
-//        }
-//        return self();
-//    }

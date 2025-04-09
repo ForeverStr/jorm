@@ -25,7 +25,9 @@ public enum ErrorCode {
     SAVEPOINT_FAILED("ORM-0018","创建保存点失败" ),
     NO_SAVEPOINT("ORM-0019","没有保存点" ),
     SESSION_CLOSED("ORM-0020","会话已关闭" ),
-    DUPLICATE_SAVEPOINT_NAME("ORM-0021","保存点名称重复" );
+    DUPLICATE_SAVEPOINT_NAME("ORM-0021","保存点名称重复" ),
+    QUERY_FAILED("ORM-0022","查询失败" ),
+    DELETE_ERROR("ORM-0023","删除失败" );
     private final String code;
     private final String message;
     ErrorCode(String code, String message) {

@@ -18,15 +18,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SQLBuilder {
-    private static final Logger log = LoggerFactory.getLogger(SQLBuilder.class);
-    // 生成 SELECT BY ID SQL（例如：SELECT * FROM user WHERE id = ?）
-    public static String buildSelectById(Class<?> clazz) {
-        Table table = clazz.getAnnotation(Table.class);
-        String tableName = table.name().isEmpty() ? clazz.getSimpleName().toLowerCase() : table.name();
-        String idColumn = EntityHelper.getIdColumnName(clazz);
-        return String.format("SELECT * FROM %s WHERE %s = ?", tableName, idColumn);
-    }
-
     // 生成动态条件 SELECT SQL
     public static String buildSelect(Class<?> clazz, List<String> conditions, String orderBy, Integer limit, List<String> paramNames) {
         Table table = clazz.getAnnotation(Table.class);
@@ -72,13 +63,5 @@ public class SQLBuilder {
                 .collect(Collectors.joining(", "));
 
         return String.format("UPDATE %s SET %s WHERE %s=?", tableName, setClause, idColumn);
-    }
-
-    // 生成 DELETE SQL（例如：DELETE FROM users WHERE id=?）
-    public static String buildDelete(Class<?> clazz) {
-        Table table = clazz.getAnnotation(Table.class);
-        String tableName = table.name().isEmpty() ? clazz.getSimpleName().toLowerCase() : table.name();
-        String idColumn = EntityHelper.getIdColumnName(clazz);
-        return String.format("DELETE FROM %s WHERE %s=?", tableName, idColumn);
     }
 }

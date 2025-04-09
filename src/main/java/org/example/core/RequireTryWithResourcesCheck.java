@@ -4,7 +4,6 @@ import com.puppycrawl.tools.checkstyle.api.AbstractCheck;
 import com.puppycrawl.tools.checkstyle.api.DetailAST;
 import com.puppycrawl.tools.checkstyle.api.TokenTypes;
 import com.puppycrawl.tools.checkstyle.utils.TokenUtil;
-import org.example.annotation.RequireTryWithResources;
 
 public class RequireTryWithResourcesCheck extends AbstractCheck {
     @Override
@@ -80,6 +79,10 @@ public class RequireTryWithResourcesCheck extends AbstractCheck {
         return false;
     }
 
+    private DetailAST getSuperClass(DetailAST classDef) {
+        return null;
+    }
+
     private boolean hasAnnotation(DetailAST classDef, String annotationName) {
         DetailAST modifiers = classDef.findFirstToken(TokenTypes.MODIFIERS);
         if (modifiers == null) return false;
@@ -102,6 +105,10 @@ public class RequireTryWithResourcesCheck extends AbstractCheck {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    private DetailAST findClassDefinition(String superClassName) {
+        return null;
     }
 
     // 简化的父类名解析（需根据项目结构完善）

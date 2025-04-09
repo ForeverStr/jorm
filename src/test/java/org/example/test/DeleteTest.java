@@ -1,23 +1,46 @@
 package org.example.test;
 
+import org.example.core.Closure;
+import org.example.core.TransactionManager;
+import org.example.entity.User;
+import org.example.session.DeleteSession;
+import org.example.session.FindSession;
+import org.junit.jupiter.api.Test;
+
+import java.sql.Connection;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class DeleteTest {
 
-    // 删除用户
-//    @Test
-//    void testCrudOperations() {
-//        try (Session session = new Session()) {
-//            session.beginTransaction();
-//            try {
-//                User user = session.find(User.class, 16L);
-//                session.delete(user);
-//            }catch (Exception e){
-//                session.rollback();
-//                throw new RuntimeException("删除失败",e);
-//            }
-//        }
-//    }
+    // 删除对象(单个实例对象)
+    @Test
+    void testCrudOperations() {
+        Closure.transaction(conn -> {
+            FindSession findSession = new FindSession(conn);
+            List<User> userList  = findSession.Where("age",100).Find(User.class);
+            DeleteSession deleteSession = new DeleteSession(conn);
+            deleteSession.Delete(userList.get(0));
+        });
+    }
+    // 删除对象(集合对象)
+    @Test
+    void testDeleteCollection() {
+        Closure.transaction(conn -> {
+            FindSession findSession = new FindSession(conn);
+            List<User> userList  = findSession.Where("age",100).Find(User.class);
+            DeleteSession deleteSession = new DeleteSession(conn);
+            deleteSession.Delete(userList);
+        });
+    }
+    // 删除对象(类对象)
+    @Test
+    void testDelete() {
+        try(DeleteSession deleteSession = new DeleteSession()){
+            deleteSession.Where("age",1).Limit(2).Delete(User.class);
+        }
+    }
 
 }

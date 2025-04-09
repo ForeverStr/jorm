@@ -70,20 +70,6 @@ public class JormSession implements AutoCloseable {
         }
     }
 
-    // 删除实体（根据 ID）
-    public <T> void delete(T entity) {
-        try {
-            String sql = SQLBuilder.buildDelete(entity.getClass());
-            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-                Object idValue = EntityHelper.getIdValue(entity);
-                stmt.setObject(1, idValue);
-                stmt.executeUpdate();
-            }
-        } catch (SQLException | IllegalAccessException e) {
-            throw new RuntimeException("删除失败", e);
-        }
-    }
-
     // 批量插入（返回生成的主键列表）
     public <T> List<Long> batchSave(List<T> entities) {
         log.debug("批量插入 SQL: {}", SaveBuilder.buildInsert(entities.get(0).getClass()));

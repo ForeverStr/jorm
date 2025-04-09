@@ -15,7 +15,6 @@ import java.sql.*;
  *     session.save(entity);
  * }
  */
-@RequireTryWithResources
 public class SaveSession extends BaseSession<SaveSession> {
     private static final Logger log = LoggerFactory.getLogger(SaveSession.class);
 
@@ -23,7 +22,6 @@ public class SaveSession extends BaseSession<SaveSession> {
     public SaveSession() {
         super();
     }
-
     // 显示事务模式
     public SaveSession(Connection externalConn) {
         super(externalConn);

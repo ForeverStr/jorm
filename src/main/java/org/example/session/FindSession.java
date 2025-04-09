@@ -2,7 +2,6 @@ package org.example.session;
 
 import org.example.exception.ErrorCode;
 import org.example.base.BaseSession;
-import org.example.core.DataSource;
 import org.example.exception.JormException;
 import org.example.dto.Condition;
 import org.example.sqlBuilder.FindBuilder;
@@ -25,9 +24,11 @@ public class FindSession extends BaseSession<FindSession> {
     private static final Logger log = LoggerFactory.getLogger(FindSession.class);
 
     public FindSession() {
-        super(DataSource.getConnection());
+        super();
     }
-
+    public FindSession(Connection externalConn) {
+        super(externalConn);
+    }
     /**
      * 设置 SELECT 子句（支持聚合函数）
      */
