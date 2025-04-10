@@ -1,9 +1,12 @@
 package org.example.util;
 
+import org.example.annotation.Aggregation;
+
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SessionHelper {
 
@@ -24,19 +27,29 @@ public class SessionHelper {
     }
 
     /**
-     * 设置 INSERT 参数
+     * 设置 INSERT 参数(单条插入)
      */
-    public static <T> void setInsertParameters(PreparedStatement stmt, T entity)
-            throws SQLException, IllegalAccessException {
+    public static void setInsertParameters(PreparedStatement stmt, Object entity) throws IllegalAccessException, SQLException {
+        setInsertParameters(stmt, entity, 1);
+    }
+    /**
+     * 设置 INSERT 参数(批量插入)
+     */
+    public static int setInsertParameters(PreparedStatement stmt, Object entity, int startIndex) throws IllegalAccessException, SQLException {
         Class<?> clazz = entity.getClass();
         List<Field> fields = EntityHelper.getInsertableFields(clazz);
+        List<Field> filteredFields = fields.stream()
+                .filter(f -> !f.isAnnotationPresent(Aggregation.class))
+                .collect(Collectors.toList());
 
-        for (int i = 0; i < fields.size(); i++) {
-            Field field = fields.get(i);
-            field.setAccessible(true);  // 强制访问私有字段
+        int index = startIndex;
+        for (Field field : filteredFields) {
+            field.setAccessible(true);
             Object value = field.get(entity);
-            stmt.setObject(i+1, value);
+            stmt.setObject(index, value);
+            index++;
         }
+        return index;
     }
 
 }

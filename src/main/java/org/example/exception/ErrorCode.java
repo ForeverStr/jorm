@@ -27,7 +27,9 @@ public enum ErrorCode {
     SESSION_CLOSED("ORM-0020","会话已关闭" ),
     DUPLICATE_SAVEPOINT_NAME("ORM-0021","保存点名称重复" ),
     QUERY_FAILED("ORM-0022","查询失败" ),
-    DELETE_ERROR("ORM-0023","删除失败" );
+    DELETE_ERROR("ORM-0023","删除失败" ),
+    SQL_EXECUTION_FAILED("ORM-0024","SQL 执行失败" ),
+    PARAMETER_BINDING_FAILED("ORM-0025","参数绑定失败" );
     private final String code;
     private final String message;
     ErrorCode(String code, String message) {

@@ -2,7 +2,6 @@ package org.example.sqlBuilder;
 
 import org.example.annotation.Column;
 import org.example.annotation.Table;
-import org.example.core.SQLBuilder;
 import org.example.dto.Condition;
 import org.example.exception.ErrorCode;
 import org.example.exception.JormException;

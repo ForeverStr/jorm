@@ -17,31 +17,50 @@ import java.util.stream.Collectors;
 
 public class SaveBuilder {
     private static final Logger log = LoggerFactory.getLogger(SaveBuilder.class);
-
-    /**
-     * 单个增加
-     */
-    public static String buildInsert(Class<?> clazz) {
+    // 表名获取方法
+    private static String getTableName(Class<?> clazz) {
         Table table = clazz.getAnnotation(Table.class);
         AssertUtils.throwAway(table, ErrorCode.SQL_GENERATION_FAILED);
-        String tableName = !table.name().isEmpty() ? table.name() : clazz.getSimpleName().toLowerCase();
-
-        List<Field> fields = EntityHelper.getInsertableFields(clazz);
-
-        List<Field> filteredFields = fields.stream()
-                .filter(f ->!f.isAnnotationPresent(Aggregation.class))
+        return !table.name().isEmpty() ? table.name() : clazz.getSimpleName().toLowerCase();
+    }
+    // 字段过滤方法
+    private static List<Field> getInsertableFields(Class<?> clazz) {
+        return EntityHelper.getInsertableFields(clazz).stream()
+                .filter(f -> !f.isAnnotationPresent(Aggregation.class))
                 .collect(Collectors.toList());
-
-        String columns = filteredFields.stream()
+    }
+    // 列名生成方法
+    private static String generateColumnNames(List<Field> fields) {
+        return fields.stream()
                 .map(f -> {
                     Column column = f.getAnnotation(Column.class);
                     return (column != null && !column.name().isEmpty()) ? column.name() : f.getName();
                 })
                 .collect(Collectors.joining(", "));
-        log.info("fields：{}",fields);
+    }
 
-        String placeholders = String.join(", ", Collections.nCopies(filteredFields.size(), "?"));
-        log.info("fields：{}",placeholders);
+    // 单个插入
+    public static String buildInsert(Class<?> clazz) {
+        String tableName = getTableName(clazz);
+        List<Field> fields = getInsertableFields(clazz);
+        String columns = generateColumnNames(fields);
+        String placeholders = String.join(", ", Collections.nCopies(fields.size(), "?"));
+
+        log.info("Insert fields: {}", fields);
+        log.info("Placeholders: {}", placeholders);
+
         return String.format("INSERT INTO %s (%s) VALUES (%s)", tableName, columns, placeholders);
+    }
+
+    // 批量插入
+    public static String buildBatchInsert(Class<?> clazz, int batchSize) {
+        String tableName = getTableName(clazz);
+        List<Field> fields = getInsertableFields(clazz);
+        String columns = generateColumnNames(fields);
+
+        String singlePlaceholder = "(" + String.join(", ", Collections.nCopies(fields.size(), "?")) + ")";
+        String allPlaceholders = String.join(", ", Collections.nCopies(batchSize, singlePlaceholder));
+
+        return String.format("INSERT INTO %s (%s) VALUES %s", tableName, columns, allPlaceholders);
     }
 }
