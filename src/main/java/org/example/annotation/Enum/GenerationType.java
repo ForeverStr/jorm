@@ -1,4 +1,4 @@
-package org.example.Enum;
+package org.example.annotation.Enum;
 
 /**
  * 主键生成策略

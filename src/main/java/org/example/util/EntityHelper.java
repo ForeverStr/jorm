@@ -2,8 +2,8 @@ package org.example.util;
 
 import org.example.annotation.Aggregation;
 import org.example.annotation.Column;
+import org.example.annotation.Enum.GenerationType;
 import org.example.annotation.GeneratedValue;
-import org.example.Enum.GenerationType;
 import org.example.annotation.Id;
 import java.lang.reflect.Field;
 import java.util.Arrays;

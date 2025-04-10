@@ -1,7 +1,7 @@
 package org.example.session;
 
 import org.example.exception.ErrorCode;
-import org.example.base.BaseSession;
+import org.example.session.base.BaseSession;
 import org.example.exception.JormException;
 import org.example.dto.Condition;
 import org.example.sqlBuilder.FindBuilder;

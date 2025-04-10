@@ -1,9 +1,7 @@
 package org.example.session;
 
 import org.example.annotation.Column;
-import org.example.annotation.RequireTryWithResources;
-import org.example.base.BaseSession;
-import org.example.core.DataSource;
+import org.example.session.base.BaseSession;
 import org.example.exception.ErrorCode;
 import org.example.exception.JormException;
 import org.example.sqlBuilder.SaveBuilder;

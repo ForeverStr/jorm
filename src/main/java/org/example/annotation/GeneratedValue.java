@@ -1,6 +1,6 @@
 package org.example.annotation;
 
-import org.example.Enum.GenerationType;
+import org.example.annotation.Enum.GenerationType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

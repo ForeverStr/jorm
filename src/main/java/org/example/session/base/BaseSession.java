@@ -1,4 +1,4 @@
-package org.example.base;
+package org.example.session.base;
 
 import org.example.core.DataSource;
 import org.example.exception.ErrorCode;

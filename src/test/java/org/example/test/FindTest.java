@@ -1,6 +1,6 @@
 package org.example.test;
 
-import org.example.core.TransactionManager;
+import org.example.transaction.TransactionManager;
 import org.example.exception.ErrorCode;
 import org.example.exception.JormException;
 import org.example.session.FindSession;

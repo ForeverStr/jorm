@@ -1,13 +1,11 @@
 package org.example.test;
 
-import org.example.core.Closure;
-import org.example.core.TransactionManager;
+import org.example.transaction.Closure;
 import org.example.entity.User;
 import org.example.session.DeleteSession;
 import org.example.session.FindSession;
 import org.junit.jupiter.api.Test;
 
-import java.sql.Connection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;

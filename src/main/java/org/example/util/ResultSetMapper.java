@@ -1,7 +1,6 @@
 package org.example.util;
 
 import org.example.exception.ErrorCode;
-import org.example.Enum.TypeHandler;
 import org.example.annotation.Column;
 import org.example.exception.JormException;
 import org.slf4j.Logger;
@@ -50,7 +49,6 @@ public class ResultSetMapper {
             Column column = field.getAnnotation(Column.class);
             String columnName = column == null ? field.getName()
                     : (!column.name().isEmpty() ? column.name() : field.getName());
-            // log.info("列名：{}",columnName);
             if (columnNames.contains(columnName.toLowerCase())) {
                 Object value = getValueByFieldType(rs,columnName,field.getType());
                 if (value != null) {

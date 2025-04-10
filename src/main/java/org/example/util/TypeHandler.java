@@ -1,4 +1,4 @@
-package org.example.Enum;
+package org.example.util;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

@@ -1,6 +1,6 @@
 package org.example.entity;
 
-import org.example.Enum.GenerationType;
+import org.example.annotation.Enum.GenerationType;
 import org.example.annotation.*;
 
 @Table(name = "users")

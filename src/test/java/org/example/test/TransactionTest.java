@@ -1,7 +1,7 @@
 package org.example.test;
 
-import org.example.core.Closure;
-import org.example.core.TransactionManager;
+import org.example.transaction.Closure;
+import org.example.transaction.TransactionManager;
 import org.example.entity.User;
 import org.example.session.SaveSession;
 import org.junit.jupiter.api.Assertions;
