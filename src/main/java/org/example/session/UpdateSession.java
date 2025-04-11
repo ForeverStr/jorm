@@ -5,12 +5,18 @@ import org.example.sqlBuilder.UpdateBuilder;
 import org.example.util.EntityHelper;
 
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
 public class UpdateSession extends BaseSession<UpdateSession> {
-
+    public UpdateSession() {
+        super();
+    }
+    public UpdateSession(Connection externalConn) {
+        super(externalConn);
+    }
     // 更新实体（根据 ID）
     public <T> void update(T entity) {
         try {
