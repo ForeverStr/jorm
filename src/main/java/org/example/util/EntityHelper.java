@@ -7,7 +7,9 @@ import org.example.annotation.GeneratedValue;
 import org.example.annotation.Id;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 public class EntityHelper {
     /**
@@ -59,5 +61,33 @@ public class EntityHelper {
         Field idField = getIdField(entity.getClass());
         idField.setAccessible(true);
         return idField.get(entity);
+    }
+    // 获取非空字段（排除主键）
+    public static Map<String, Object> getNonNullFields(Object entity) {
+        Map<String, Object> fields = new LinkedHashMap<>();
+        Class<?> clazz = entity.getClass();
+        Field idField = getIdField(clazz);
+
+        for (Field field : getUpdatableFields(clazz)) {
+            if (field.equals(idField)) continue;
+
+            try {
+                field.setAccessible(true);
+                Object value = field.get(entity);
+                if (value != null) {
+                    String column = getColumnName(field);
+                    fields.put(column, value);
+                }
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("Field access failed", e);
+            }
+        }
+        return fields;
+    }
+    private static String getColumnName(Field field) {
+        Column columnAnno = field.getAnnotation(Column.class);
+        return (columnAnno != null && !columnAnno.name().isEmpty())
+                ? columnAnno.name()
+                : field.getName();
     }
 }

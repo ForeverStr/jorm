@@ -34,7 +34,7 @@ public class DeleteSession extends BaseSession<DeleteSession> {
     }
     public DeleteSession Limit(int limit) {
         this.limit = limit;
-        return this;
+        return self();
     }
     // 执行删除（实例对象）
     public <T> void Delete(T entity) {
@@ -56,6 +56,9 @@ public class DeleteSession extends BaseSession<DeleteSession> {
             }
         } catch (SQLException | IllegalAccessException e) {
             throw new JormException(ErrorCode.DELETE_ERROR, e);
+        }finally {
+            // 每次执行后重置状态
+            resetState();
         }
     }
     // 执行批量实例对象删除
@@ -74,6 +77,9 @@ public class DeleteSession extends BaseSession<DeleteSession> {
             }
         } catch (SQLException | IllegalAccessException e) {
             throw new JormException(ErrorCode.DELETE_ERROR, e);
+        }finally {
+            // 每次执行后重置状态
+            resetState();
         }
     }
 
@@ -90,7 +96,15 @@ public class DeleteSession extends BaseSession<DeleteSession> {
             }
         } catch (SQLException e) {
             throw new JormException(ErrorCode.DELETE_ERROR, e);
+        }finally {
+            // 每次执行后重置状态
+            resetState();
         }
+    }
+    private void resetState() {
+        this.conditions.clear();
+         this.params.clear();
+         this.limit = 0;
     }
     @Override
     protected DeleteSession self() {

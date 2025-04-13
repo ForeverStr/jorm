@@ -34,7 +34,7 @@ public class FindSession extends BaseSession<FindSession> {
      */
     public FindSession Select(String selectClause) {
         this.selectClause = selectClause;
-        return this;
+        return self();
     }
     /**
      * 链式添加having条件
@@ -98,7 +98,19 @@ public class FindSession extends BaseSession<FindSession> {
             }
         } catch (SQLException | IllegalAccessException | InstantiationException e) {
             throw new JormException(ErrorCode.QUERY_EXECUTION_FAILED, e);
+        }finally {
+            // 每次执行后重置状态
+            resetState();
         }
+    }
+    private void resetState() {
+        this.conditions.clear();
+        this.havingConditions.clear();
+        this.params.clear();
+        this.group = null;
+        this.selectClause = "*";
+        this.orderBy = null;
+        this.limit = null;
     }
 
     @Override

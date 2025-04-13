@@ -1,72 +1,120 @@
 package org.example.session;
 
+import org.example.dto.Condition;
+import org.example.exception.ErrorCode;
+import org.example.exception.JormException;
 import org.example.session.base.BaseSession;
 import org.example.sqlBuilder.UpdateBuilder;
 import org.example.util.EntityHelper;
 
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UpdateSession extends BaseSession<UpdateSession> {
+    private List<Condition> conditions = new ArrayList<>();
+    private Class<?> entityClass;
+    private Object updateEntity;
+    private Map<String, Object> updates = new LinkedHashMap<>();
     public UpdateSession() {
         super();
     }
     public UpdateSession(Connection externalConn) {
         super(externalConn);
     }
-    // 更新实体（根据 ID）
-    public <T> void update(T entity) {
-        try {
-            String sql = UpdateBuilder.buildUpdate(entity.getClass());
-            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-                setUpdateParameters(stmt, entity);
-                stmt.executeUpdate();
+    public UpdateSession Model(Class<?> entityClass) {
+        this.entityClass = entityClass;
+        return self();
+    }
+    public UpdateSession Where(String column, Object value){
+        conditions.add(new Condition(column, "=", value));
+        return self();
+    }
+    public UpdateSession Where(String column, String operator, Object value){
+        conditions.add(new Condition(column, operator, value));
+        return self();
+    }
+    /**
+     * 更新实体（根据条件）
+     */
+    public void Update(Object entity) {
+        this.updateEntity = entity;
+        executeEntityUpdate();
+    }
+    /**
+     * 更新指定字段（单个字段）
+     */
+    public void Update(String column, Object value) {
+        updates.put(column, value);
+        executeUpdate();
+    }
+
+    /**
+     * 更新指定字段（多个字段）
+     */
+    public void Update(Object... columnValuePairs) {
+        if (columnValuePairs.length % 2 != 0) {
+            throw new JormException(ErrorCode.INVALID_COLUMN_NAME);
+        }
+        for (int i = 0; i < columnValuePairs.length; i += 2) {
+            String column = (String) columnValuePairs[i];
+            Object value = columnValuePairs[i + 1];
+            updates.put(column, value);
+        }
+        executeUpdate();
+    }
+    // 执行实体更新（根据条件）
+    private void executeEntityUpdate() {
+        validateUpdate();
+        Map<String, Object> updateFields = EntityHelper.getNonNullFields(updateEntity);
+        if (updateFields.isEmpty()) {
+            throw new IllegalStateException("No non-null fields to update");
+        }
+        executeUpdate(entityClass, conditions, updateFields);
+    }
+    // 执行指定字段更新（根据条件）
+    private void executeUpdate() {
+        validateUpdate();
+        executeUpdate(entityClass, conditions, updates);
+    }
+    private void executeUpdate(Class<?> entityClass,
+                               List<Condition> conditions,
+                               Map<String, Object> updates){
+        String sql = UpdateBuilder.buildUpdateSql(entityClass, conditions, updates);
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            // 设置SET部分的参数
+            for (Object value : updates.values()) {
+                stmt.setObject(parameterIndex++, value);
             }
-        } catch (SQLException | IllegalAccessException e) {
+            // 设置WHERE条件的参数
+            for (Condition condition : conditions) {
+                stmt.setObject(parameterIndex++, condition.getValue());
+            }
+            stmt.executeUpdate();
+        } catch (SQLException e) {
             throw new RuntimeException("Update failed", e);
+        }finally {
+            // 每次执行后重置状态
+            resetState();
         }
     }
-
-    // 批量更新
-    public <T> void batchUpdate(List<T> entities) {
-        if (entities.isEmpty()) return;
-
-        try {
-            String sql = UpdateBuilder.buildUpdate(entities.get(0).getClass());
-            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-                for (T entity : entities) {
-                    setUpdateParameters(stmt, entity);
-                    stmt.addBatch();
-                }
-                stmt.executeBatch();
-            }
-        } catch (SQLException | IllegalAccessException e) {
-            throw new RuntimeException("Batch update failed", e);
+    private void validateUpdate() {
+        if (entityClass == null) throw new JormException(ErrorCode.MODEL_NOT_SPECIFIED);
+        if (conditions.isEmpty()) {
+            throw new JormException(ErrorCode.CONDITION_NOT_SPECIFIED);
         }
     }
-
-    // 工具方法：设置 UPDATE 参数（排除主键）
-    private <T> void setUpdateParameters(PreparedStatement stmt, T entity)
-            throws SQLException, IllegalAccessException {
-        Class<?> clazz = entity.getClass();
-        List<Field> fields = EntityHelper.getUpdatableFields(clazz);
-        Field idField = EntityHelper.getIdField(clazz);
-
-        // 设置非主键字段
-        int index = 1;
-        for (Field field : fields) {
-            field.setAccessible(true);
-            stmt.setObject(index++, field.get(entity));
-        }
-
-        // 设置 WHERE 主键条件
-        idField.setAccessible(true);
-        stmt.setObject(index, idField.get(entity));
+    private void resetState() {
+        this.conditions.clear();
+        this.updates.clear();
+        this.updateEntity = null;
+        this.entityClass = null;
     }
-
     @Override
     protected UpdateSession self() {
         return this;

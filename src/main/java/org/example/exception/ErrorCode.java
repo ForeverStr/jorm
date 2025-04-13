@@ -29,7 +29,9 @@ public enum ErrorCode {
     QUERY_FAILED("ORM-0022","查询失败" ),
     DELETE_ERROR("ORM-0023","删除失败" ),
     SQL_EXECUTION_FAILED("ORM-0024","SQL 执行失败" ),
-    PARAMETER_BINDING_FAILED("ORM-0025","参数绑定失败" );
+    PARAMETER_BINDING_FAILED("ORM-0025","参数绑定失败" ),
+    MODEL_NOT_SPECIFIED("ORM-0026","模型未指定" ),
+    CONDITION_NOT_SPECIFIED("ORM-0027","条件未指定" );
     private final String code;
     private final String message;
     ErrorCode(String code, String message) {
