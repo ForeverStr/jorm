@@ -35,7 +35,6 @@ public class TransactionTest {
             throw e;
         }
     }
-
     //闭包事务测试；嵌套事务测试
     @Test
     void  DeclarativeTransactionTest() {

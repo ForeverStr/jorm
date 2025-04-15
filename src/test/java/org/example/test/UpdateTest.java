@@ -18,25 +18,14 @@ public class UpdateTest {
     @Test
     void testCrudOperations() {
         Closure.transaction(conn ->{
-            SaveSession saveSession = new SaveSession(conn);
-            User user1 = new User("更新测试", 22, "active");
-            User user2 = new User("更新测试", 23, "inactive");
-            saveSession.save(user1);
-            saveSession.save(user2);
-
             UpdateSession updateSession = new UpdateSession(conn);
-            updateSession.Model(User.class)
-                    .Where("id", user1.getId())
-                    .Update("age", 33);
-            updateSession.Model(User.class)
-                    .Where("id", user2.getId())
-                    .Update("status", "active");
-
-            FindSession findSession = new FindSession(conn);
-            List<User> users = findSession.Where("name","更新测试").Find(User.class);
-            for (User user : users) {
-                System.out.println(user.getName() + " " + user.getAge() + " " + user.getStatus());
-            }
+            updateSession.Model(User.class).
+                    Where("user_name","批量测试1").
+                    Where("age","<",100).
+                    Set("user_name","Bob").
+                    Set("age", 20).
+                    Set("status", "inactive").
+                    Update();
         });
     }
 }

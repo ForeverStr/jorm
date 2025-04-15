@@ -1,6 +1,7 @@
 package org.example.test;
 
 import org.example.entity.User;
+import org.example.session.FindSession;
 import org.example.session.SaveSession;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -13,11 +14,16 @@ public class SaveTest {
     //保存测试
     @Test
     void testSave() {
-        try (SaveSession session = new SaveSession()) {
+        try (SaveSession session = new SaveSession();
+             FindSession findSession = new FindSession()) {
             User user = new User();
-            user.setName("保存测试");
+            user.setName("复试测试");
             session.save(user);
             Assertions.assertNotNull(user.getId());
+            List<User> users = findSession.Where("user_name", user.getName()).Find(User.class);
+            Assertions.assertEquals(1, users.size());
+            User savedUser = users.get(0);
+            Assertions.assertEquals("复试测试", savedUser.getName());
         }
     }
     //批量插入测试
