@@ -31,7 +31,9 @@ public enum ErrorCode {
     SQL_EXECUTION_FAILED("ORM-0024","SQL 执行失败" ),
     PARAMETER_BINDING_FAILED("ORM-0025","参数绑定失败" ),
     MODEL_NOT_SPECIFIED("ORM-0026","模型未指定" ),
-    CONDITION_NOT_SPECIFIED("ORM-0027","条件未指定" );
+    CONDITION_NOT_SPECIFIED("ORM-0027","条件未指定" ),
+    DUPLICATE_KEY("ORM-0028", "主键冲突"),
+    CONNECTION_TIMEOUT("ORM-0029", "数据库连接超时"),;
     private final String code;
     private final String message;
     ErrorCode(String code, String message) {

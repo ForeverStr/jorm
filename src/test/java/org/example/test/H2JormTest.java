@@ -1,9 +1,12 @@
 package org.example.test;
 
 import org.example.entity.User;
+import org.example.session.DeleteSession;
 import org.example.session.FindSession;
 import org.example.session.SaveSession;
 import org.example.session.UpdateSession;
+import org.example.session.base.JormSession;
+import org.example.session.factory.Jorm;
 import org.example.transaction.Closure;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -39,39 +42,63 @@ public class H2JormTest {
             connection.close(); // 关闭连接后，内存数据库自动销毁
         }
     }
-    //保存测试
+    //工厂模式测试
     @Test
-    void testSave() {
-        try (SaveSession session = new SaveSession(connection)) {
-            User user = new User();
-            user.setName("保存测试");
+    void testFactoryCRUD() {
+        try (SaveSession session = Jorm.saveSession(connection)) {
+            User user = new User("保存测试", 20, "active");
             session.save(user);
-            Assertions.assertNotNull(user.getId());
+        }
+        try (UpdateSession session = Jorm.updateSession(connection)) {
+            session.Model(User.class).
+                    Where("user_name", "保存测试").
+                    Set("user_name", "更新测试").
+                    Update();
+        }
+        try (FindSession session = Jorm.findSession(connection)) {
+            List<User> userList = session.Where("user_name", "更新测试").Find(User.class);
+            Assertions.assertEquals(1, userList.size());
+            Assertions.assertEquals("更新测试", userList.get(0).getName());
+            Assertions.assertEquals(20, userList.get(0).getAge());
+        }
+        try (DeleteSession session = Jorm.deleteSession(connection)) {
+            session.Where("user_name", "更新测试").Delete(User.class);
+        }
+        try (FindSession session = Jorm.findSession(connection)) {
+            List<User> userList = session.Where("user_name", "更新测试").Find(User.class);
+            Assertions.assertEquals(0, userList.size());
         }
     }
+    //统一接口模式测试
     @Test
-    void testCrudOperations() {
-        try (SaveSession session = new SaveSession(connection);
-             UpdateSession updateSession = new UpdateSession(connection);
-             FindSession findSession = new FindSession(connection)) {
+    void testInterfaceCRUD() {
+        try (JormSession session = new JormSession(connection)) {
             User user1 = new User("更新测试1", 10, "active");
-            User user2 = new User("更新测试2", 20, "inactive");
-            User user3 = new User("更新测试3", 30, "active");
-            session.save(user1);
-            session.save(user2);
-            session.save(user3);
-            List<User> userList1 = findSession.Where("user_name", "更新测试1").Find(User.class);
-            Assertions.assertEquals(1, userList1.size());
-            updateSession.Model(User.class).
+            User user2 = new User("更新测试2", 10, "inactive");
+            User user3 = new User("更新测试3", 10, "active");
+            session.saveSession().save(user1);
+            session.saveSession().save(user2);
+            session.saveSession().save(user3);
+
+            session.updateSession().Model(User.class).
                     Where("user_name","更新测试1").
                     Set("user_name","Bob").
-                    Set("age", 20).
                     Set("status", "inactive").
                     Update();
-            List<User> userList2 = findSession.Where("user_name", "Bob").Find(User.class);
+            List<User> userList1 = session.findSession().Where("user_name", "Bob").Find(User.class);
+            Assertions.assertEquals("Bob", userList1.get(0).getName());
+            Assertions.assertEquals(10, userList1.get(0).getAge());
+
+            List<User> userList2 = session.findSession().Where("age", 10).Find(User.class);
+            Assertions.assertEquals(3, userList2.size());
             Assertions.assertEquals("Bob", userList2.get(0).getName());
-            System.out.println(userList2.get(0).getName());
+            Assertions.assertEquals("更新测试2", userList2.get(1).getName());
+
+            session.deleteSession().Where("user_name","Bob").Delete(User.class);
+
+            List<User> userList3 = session.findSession().Where("age", 10).Find(User.class);
+            Assertions.assertEquals(2, userList3.size());
+            Assertions.assertEquals("更新测试2", userList3.get(0).getName());
         }
     }
-
 }

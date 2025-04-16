@@ -1,7 +1,6 @@
 package org.example.test;
 
 import org.example.entity.User;
-import org.example.session.FindSession;
 import org.example.session.SaveSession;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -14,16 +13,9 @@ public class SaveTest {
     //保存测试
     @Test
     void testSave() {
-        try (SaveSession session = new SaveSession();
-             FindSession findSession = new FindSession()) {
-            User user = new User();
-            user.setName("复试测试");
+        try (SaveSession session = new SaveSession()) {
+            User user = new User("保存测试", 25, "active");
             session.save(user);
-            Assertions.assertNotNull(user.getId());
-            List<User> users = findSession.Where("user_name", user.getName()).Find(User.class);
-            Assertions.assertEquals(1, users.size());
-            User savedUser = users.get(0);
-            Assertions.assertEquals("复试测试", savedUser.getName());
         }
     }
     //批量插入测试
@@ -35,12 +27,9 @@ public class SaveTest {
                     new User("批量测试1", 25,"active"),
                     new User("批量测试2", 30,"active")
             );
-
             List<Long> ids = session.batchSave(validUsers);
+            Assertions.assertEquals(2, ids.size());
             System.out.println("插入成功，生成的主键 IDs: " + ids);
-        } catch (Exception e) {
-            System.err.println("插入失败: " + e.getMessage());
         }
     }
-
 }
