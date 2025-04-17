@@ -21,7 +21,7 @@ public enum ErrorCode {
     COMMIT_FAILED("ORM-0014","提交事务失败" ),
     ROLLBACK_FAILED("ORM-0015","回滚事务失败" ),
     NESTED_TRANSACTION_NOT_SUPPORTED("ORM-0016","嵌套事务不支持" ),
-    NO_ACTIVE_TRANSACTION("ORM-0017","没有活动事务" ),
+    NO_ACTIVE_CONNECTION("ORM-0017","没有活动连接" ),
     SAVEPOINT_FAILED("ORM-0018","创建保存点失败" ),
     NO_SAVEPOINT("ORM-0019","没有保存点" ),
     SESSION_CLOSED("ORM-0020","会话已关闭" ),
@@ -33,7 +33,8 @@ public enum ErrorCode {
     MODEL_NOT_SPECIFIED("ORM-0026","模型未指定" ),
     CONDITION_NOT_SPECIFIED("ORM-0027","条件未指定" ),
     DUPLICATE_KEY("ORM-0028", "主键冲突"),
-    CONNECTION_TIMEOUT("ORM-0029", "数据库连接超时"),;
+    CONNECTION_TIMEOUT("ORM-0029", "数据库连接超时"),
+    TRANSACTION_BEGIN_FAILED("ORM-0030","事务开启失败");
     private final String code;
     private final String message;
     ErrorCode(String code, String message) {

@@ -1,5 +1,6 @@
 package org.example.test;
 
+import org.example.session.base.JormSession;
 import org.example.transaction.TransactionManager;
 import org.example.exception.ErrorCode;
 import org.example.exception.JormException;
@@ -63,6 +64,23 @@ public class FindTest {
         }catch (Exception e){
             TransactionManager.rollback();
             throw new RuntimeException("查询失败",e);
+        }
+    }
+    @Test
+    void test() {
+        //单表聚合函数查询
+        Connection connection = TransactionManager.begin();
+        try (JormSession session = new JormSession(connection)) {
+            session.saveSession().save(new User("test4", 30, "active"));
+            TransactionManager.commit();
+            List<User> userList = session.findSession().Where("user_name" ,"test4").Find(User.class);
+            TransactionManager.commit();
+            assertNotNull(userList);
+        }catch (Exception e){
+            TransactionManager.rollback();
+            throw new RuntimeException("查询失败",e);
+        }finally {
+            TransactionManager.release();
         }
     }
 }

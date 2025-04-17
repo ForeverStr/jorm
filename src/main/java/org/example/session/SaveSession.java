@@ -62,7 +62,7 @@ public class SaveSession extends BaseSession<SaveSession> {
      * <p>单个增加</p>
      * <p>不存在于数据库表但实际业务需要的字段需要加上{@link Aggregation}</p>
      * @param entity 实体对象
-     * @throws JormException 数据库操作异常
+     * @throws JormException 数据库操作异常，包括主键冲突，SQL生成失败，SQL执行失败，参数绑定失败
      */
     public <T> void save(T entity) {
         checkIfClosed();
@@ -101,7 +101,7 @@ public class SaveSession extends BaseSession<SaveSession> {
      * <p>不存在于数据库表但实际业务需要的字段需要加上{@link Aggregation}</p>
      * @param entities 实体对象列表
      * @return 新增记录的主键列表
-     * @throws JormException 数据库操作异常
+     * @throws JormException 数据库操作异常，包括主键冲突，SQL生成失败，SQL执行失败，参数绑定失败
      */
     public <T> List<Long> batchSave(List<T> entities) {
         if (entities.isEmpty()) {

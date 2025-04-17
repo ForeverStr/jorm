@@ -19,6 +19,8 @@ public class Closure {
         } catch (Exception e) {
             TransactionManager.rollback();
             throw new JormException(ErrorCode.TRANSACTION_FAILED, e);
+        } finally {
+            TransactionManager.release();
         }
     }
 }
