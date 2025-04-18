@@ -42,7 +42,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * </p>
  * @author duyujie
  * @version 1.0
- * @since 2020/8/24 16:22
  * @see BaseSession
  * @see SaveBuilder
  * @see SessionHelper

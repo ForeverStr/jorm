@@ -28,6 +28,9 @@ import java.sql.SQLException;
  *             TransactionManager.release();
  *         }</pre>
  * </p>
+ * <p>
+ *     注意：需要在最后释放连接，否则会造成连接泄漏。
+ * </p>
  * @author duyujie
  * @version 1.0
  */
@@ -42,12 +45,14 @@ public class TransactionManager {
      *     示例代码如下：<pre>        Connection connection = TransactionManager.begin();</pre>
      * </p>
      * @return 事务连接
-     * @throws JormException 事务异常
+     * @throws JormException 30001 事务开启失败
      */
     public static Connection begin() {
         Connection conn = transactionConnectionHolder.get();
         if (conn != null) {
-            throw new JormException(ErrorCode.NESTED_TRANSACTION_NOT_SUPPORTED);
+            log.error("[ErrorCode={}] 事务开启失败,当前线程已存在事务连接，无法开启新的事务",
+                    ErrorCode.TRANSACTION_BEGIN_FAILED.getCode());
+            throw new JormException(ErrorCode.TRANSACTION_BEGIN_FAILED);
         }
         conn = DataSource.getConnection();
         try {
@@ -65,18 +70,19 @@ public class TransactionManager {
      * <p>
      *     示例代码如下：<pre>        TransactionManager.commit();</pre>
      * </p>
-     * @throws JormException 事务异常
+     * @throws JormException 30002 事务提交失败
      */
     public static void commit() {
         Connection conn = transactionConnectionHolder.get();
         if (conn == null) {
-            log.warn("连接已从线程变量中移除，无法提交事务");
-            throw new JormException(ErrorCode.NO_ACTIVE_CONNECTION);
+            log.error("连接已从线程变量中移除，无法提交事务");
+            throw new JormException(ErrorCode.TRANSACTION_COMMIT_FAILED);
         }
         try {
             conn.commit();
         } catch (SQLException e) {
-            throw new JormException(ErrorCode.COMMIT_FAILED, e);
+            log.error("[ErrorCode={}] 事务提交失败", ErrorCode.TRANSACTION_COMMIT_FAILED.getCode(), e);
+            throw new JormException(ErrorCode.TRANSACTION_COMMIT_FAILED, e);
         }
     }
 
@@ -85,15 +91,19 @@ public class TransactionManager {
      * <p>
      *     示例代码如下：<pre>        TransactionManager.rollback();</pre>
      * </p>
-     * @throws JormException 事务异常
+     * @throws JormException 30003 事务回滚失败
      */
     public static void rollback() {
         Connection conn = transactionConnectionHolder.get();
-        if (conn == null) return;
+        if (conn == null) {
+            log.warn("连接已从线程变量中移除，无需回滚操作");
+            return;
+        }
         try {
             conn.rollback();
         } catch (SQLException e) {
-            throw new JormException(ErrorCode.ROLLBACK_FAILED, e);
+            log.error("[ErrorCode={}] 事务回滚失败", ErrorCode.TRANSACTION_ROLLBACK_FAILED.getCode(), e);
+            throw new JormException(ErrorCode.TRANSACTION_ROLLBACK_FAILED, e);
         }
     }
 
@@ -102,7 +112,7 @@ public class TransactionManager {
      * <p>
      *     示例代码如下：<pre>        TransactionManager.release();</pre>
      * </p>
-     * @throws JormException 事务异常
+     * @throws JormException 30004 连接关闭失败
      */
     public static void release() {
         Connection conn = transactionConnectionHolder.get();
@@ -110,11 +120,13 @@ public class TransactionManager {
             try {
                 conn.close();
             } catch (SQLException e) {
-                log.error("关闭连接失败", e);
-                throw new JormException(ErrorCode.CONNECTION_ERROR, e);
+                log.error("[ErrorCode={}] 连接关闭失败",ErrorCode.TRANSACTION_CLOSE_FAILED.getCode(), e);
+                throw new JormException(ErrorCode.TRANSACTION_CLOSE_FAILED, e);
             } finally {
                 transactionConnectionHolder.remove();
             }
+        }else {
+            log.warn("连接已从线程变量中移除，无需关闭操作");
         }
     }
 

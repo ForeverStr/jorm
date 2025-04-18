@@ -13,6 +13,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * <p>
+ * 用于查询的会话
+ * </p>
+ */
 public class FindSession extends BaseSession<FindSession> {
     private final List<Condition> conditions = new ArrayList<>();
     private final List<Condition> havingConditions = new ArrayList<>();
@@ -85,22 +90,40 @@ public class FindSession extends BaseSession<FindSession> {
      * 执行查询
      */
     public <T> List<T> Find(Class<T> clazz) {
+        // 前置校验：确保连接和参数合法
+        checkIfClosed();
+        if (clazz == null) {
+            log.error("[ErrorCode={}] 模型未指定", ErrorCode.MODEL_NOT_SPECIFIED.getCode());
+            throw new JormException(ErrorCode.MODEL_NOT_SPECIFIED, "模型未指定");
+        }
+
+        String sql = null;
         try {
-            String sql = FindBuilder.buildFindSelect(clazz, conditions,limit,orderBy,group,havingConditions,selectClause);
-            log.info("查询语句1：{}",sql);
+            sql = FindBuilder.buildFindSelect(clazz, conditions, limit, orderBy, group, havingConditions, selectClause);
+            log.debug("Generated SQL: [{}], Parameters: {}", sql, params);
+
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 for (int i = 0; i < params.size(); i++) {
                     stmt.setObject(i + 1, params.get(i));
                 }
-                log.info("查询语句2：{}",stmt);
+                log.debug("Executing query with parameters: {}", params);
                 ResultSet rs = stmt.executeQuery();
-                return ResultSetMapper.mapToList(rs,clazz);
+                return ResultSetMapper.mapToList(rs, clazz);
             }
-        } catch (SQLException | IllegalAccessException | InstantiationException e) {
-            throw new JormException(ErrorCode.QUERY_EXECUTION_FAILED, e);
-        }finally {
-            // 每次执行后重置状态
-            resetState();
+        } catch (SQLException e) {
+            String errorMsg = String.format("SQL执行失败 [SQL=%s, Params=%s]", sql, params);
+            log.error("[ErrorCode={}] {}", ErrorCode.QUERY_EXECUTION_FAILED.getCode(), errorMsg, e);
+            throw new JormException(ErrorCode.QUERY_EXECUTION_FAILED, errorMsg, e);
+        } catch (IllegalAccessException | InstantiationException e) {
+            String errorMsg = String.format("结果映射失败 [Class=%s]", clazz.getName());
+            log.error("[ErrorCode={}] {}", ErrorCode.RESULT_MAPPING_FAILED.getCode(), errorMsg, e);
+            throw new JormException(ErrorCode.RESULT_MAPPING_FAILED, errorMsg, e);
+        } catch (Exception e) {
+            String errorMsg = String.format("未知查询错误 [SQL=%s]", sql);
+            log.error("[ErrorCode={}] {}", ErrorCode.UNKNOWN_QUERY_ERROR.getCode(), errorMsg, e);
+            throw new JormException(ErrorCode.UNKNOWN_QUERY_ERROR, errorMsg, e);
+        } finally {
+            resetState(); // 确保每次执行后状态重置
         }
     }
     private void resetState() {
