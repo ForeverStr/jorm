@@ -1,5 +1,6 @@
 package org.example.session.base;
 
+import org.example.core.DataSource;
 import org.example.session.DeleteSession;
 import org.example.session.FindSession;
 import org.example.session.SaveSession;
@@ -30,7 +31,7 @@ import java.sql.Connection;
  * @see DeleteSession
  */
 public class JormSession implements AutoCloseable {
-    private final Connection connection;
+    private  Connection connection;
     private SaveSession saveSession;
     private FindSession findSession;
     private UpdateSession updateSession;
@@ -39,34 +40,51 @@ public class JormSession implements AutoCloseable {
     public JormSession(Connection conn) {
         this.connection = conn;
     }
+    public JormSession() {
+
+    }
 
     // 懒加载各会话实例
     public SaveSession saveSession() {
-        if (saveSession == null) {
-            saveSession = new SaveSession(connection);
+        if (saveSession == null){
+            if (connection != null) {
+                saveSession = new SaveSession(connection);
+            }else {
+                saveSession = new SaveSession();
+            }
         }
         return saveSession;
     }
-
     public FindSession findSession() {
-        if (findSession == null) {
-            findSession = new FindSession(connection);
+        if (findSession == null){
+            if (connection != null) {
+                findSession = new FindSession(connection);
+            }else {
+                findSession = new FindSession();
+            }
         }
         return findSession;
     }
     public UpdateSession updateSession() {
-        if (updateSession == null) {
-            updateSession = new UpdateSession(connection);
+        if (updateSession == null){
+            if (connection != null) {
+                updateSession = new UpdateSession(connection);
+            }else {
+                updateSession = new UpdateSession();
+            }
         }
         return updateSession;
     }
     public DeleteSession deleteSession() {
-        if (deleteSession == null) {
-            deleteSession = new DeleteSession(connection);
+        if (deleteSession == null){
+            if (connection != null) {
+                deleteSession = new DeleteSession(connection);
+            }else {
+                deleteSession = new DeleteSession();
+            }
         }
         return deleteSession;
     }
-
     @Override
     public void close() {
         // 统一关闭所有会话

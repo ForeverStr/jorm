@@ -3,6 +3,7 @@ package org.example.exception;
 /**
  * JORM 框架统一异常，封装所有数据库操作相关的错误
  * @author 杜玉杰
+ * @version 1.0.0
  */
 public class JormException extends RuntimeException {
     private final ErrorCode errorCode;
@@ -24,7 +25,6 @@ public class JormException extends RuntimeException {
         super(errorCode.getMessage() + ": " + detailMessage, cause);
         this.errorCode = errorCode;
     }
-
     public ErrorCode getErrorCode() {
         return errorCode;
     }

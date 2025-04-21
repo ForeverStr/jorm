@@ -6,6 +6,7 @@ import org.example.exception.ErrorCode;
 import org.example.exception.JormException;
 import org.example.session.FindSession;
 import org.example.entity.User;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  */
 public class FindTest {
 
-    private final Logger log = LoggerFactory.getLogger(SaveTest.class);
+    private final Logger log = LoggerFactory.getLogger(FindTest.class);
 
     @Test
     void testCrudOperations() {
@@ -37,11 +38,13 @@ public class FindTest {
                     .Find(User.class);
             TransactionManager.commit();
             assertNotNull(userList);
-            System.out.println(userList.get(0).getAge());
-            System.out.println(userList.get(1).getAge());
+            Assertions.assertEquals(2, userList.size());
+            Assertions.assertEquals("研发部",userList.get(0).getDepartment());
         }catch (Exception e){
                 TransactionManager.rollback();
-                throw new JormException(ErrorCode.QUERY_FAILED,e);
+            throw new RuntimeException("查询失败",e);
+        }finally {
+            TransactionManager.release();
         }
     }
     @Test
@@ -64,6 +67,8 @@ public class FindTest {
         }catch (Exception e){
             TransactionManager.rollback();
             throw new RuntimeException("查询失败",e);
+        }finally {
+            TransactionManager.release();
         }
     }
     @Test

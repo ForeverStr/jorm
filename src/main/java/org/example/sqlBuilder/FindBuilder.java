@@ -37,6 +37,7 @@ public class FindBuilder {
                 throw new JormException(ErrorCode.INVALID_COLUMN);
             }
             if (!allowedOperators.contains(cond.getOperator().toUpperCase())) {
+
                 throw new JormException(ErrorCode.INVALID_OPERATOR);
             }
         }

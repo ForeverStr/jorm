@@ -23,4 +23,5 @@ public class Condition {
     public Object getValue() {
         return value;
     }
+
 }
