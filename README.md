@@ -1,4 +1,4 @@
 # orm
 持久层框架
 
-java版的gorm框架
+基于gorm风格的java版orm框架
