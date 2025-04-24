@@ -1,8 +1,8 @@
 package io.github.foreverstr.session.base;
 
-import io.github.foreverstr.core.DataSource;
 import io.github.foreverstr.exception.ErrorCode;
 import io.github.foreverstr.exception.JormException;
+import io.github.foreverstr.session.factory.Jorm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
 
     // 支持自动事务
     protected BaseSession() {
-        this(DataSource.getConnection());
+        this(Jorm.getConnection());
         this.isManagedConnection = true;
         try {
             this.connection.setAutoCommit(true);

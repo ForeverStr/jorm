@@ -1,8 +1,8 @@
 package io.github.foreverstr.transaction;
 
-import io.github.foreverstr.core.DataSource;
 import io.github.foreverstr.exception.ErrorCode;
 import io.github.foreverstr.exception.JormException;
+import io.github.foreverstr.session.factory.Jorm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public class TransactionManager {
                     ErrorCode.TRANSACTION_BEGIN_FAILED.getCode());
             throw new JormException(ErrorCode.TRANSACTION_BEGIN_FAILED);
         }
-        conn = DataSource.getConnection();
+        conn = Jorm.getConnection();
         try {
             conn.setAutoCommit(false);
             transactionConnectionHolder.set(conn);

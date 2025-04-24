@@ -44,7 +44,14 @@ public class FindBuilder {
             String[] selectParts = selectClause.split(",");
             for (String part : selectParts) {
                 part = part.trim();
-                if (!part.matches("[a-zA-Z_]+(\\s+AS\\s+[a-zA-Z_]+)?|([A-Z]+)\\([a-zA-Z_]+\\)(\\s+AS\\s+[a-zA-Z_]+)?")) {
+                String regex =
+                        "(?i)" + // 全局大小写不敏感
+                                "(" +
+                                "[a-zA-Z0-9_]+(\\s+AS\\s+[a-zA-Z0-9_]+)?" +  // 普通列名或别名
+                                "|" +
+                                "(?-i)(SUM|COUNT|AVG|MAX|MIN)\\([a-zA-Z0-9_]+\\)(\\s+AS\\s+[a-zA-Z0-9_]+)?" + // 聚合函数（强制大写）
+                                ")";
+                if (!part.matches(regex)) {
                     throw new JormException(ErrorCode.INVALID_SELECT_CLAUSE);
                 }
             }

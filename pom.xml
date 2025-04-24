@@ -7,7 +7,7 @@
     <!-- 项目坐标 -->
     <groupId>io.github.foreverstr</groupId>
     <artifactId>jorm</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.4</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -73,12 +73,6 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.33</version>
         </dependency>
-        <!-- HikariCP 连接池 -->
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>4.0.3</version>
-        </dependency>
         <!-- junit 单元测试 -->
         <dependency>
             <groupId>junit</groupId>
@@ -115,17 +109,6 @@
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
             <version>1.2.11</version>
-        </dependency>
-        <!--checkstyle 代码检查 -->
-        <dependency>
-            <groupId>com.puppycrawl.tools</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>9.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.puppycrawl.tools</groupId>
-            <artifactId>checkstyle</artifactId>
-            <version>10.12.0</version>
         </dependency>
         <!-- Spring Framework 核心库 -->
         <dependency>
@@ -166,26 +149,6 @@
                         <goals>
                             <goal>jar-no-fork</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>check-compile</id>
-                        <phase>compile</phase>
-                        <goals><goal>check</goal></goals>
-                    </execution>
-                    <execution>
-                        <id>check-test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals><goal>check</goal></goals>
                     </execution>
                 </executions>
             </plugin>

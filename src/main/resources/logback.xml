@@ -25,9 +25,12 @@
         </encoder>
     </appender>
 
-    <!-- 日志输出级别 -->
-    <root level="ALL">
+    <!-- 细化组件日志级别 -->
+    <logger name="org.apache.tomcat" level="INFO"/>
+    <logger name="org.springframework" level="INFO"/>
+
+    <!-- 全局日志级别调整为INFO -->
+    <root level="INFO">
         <appender-ref ref="STDOUT" />
-<!--        <appender-ref ref="FILE" />-->
     </root>
 </configuration>
