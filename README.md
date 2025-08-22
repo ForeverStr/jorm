@@ -251,12 +251,6 @@ jorm:
 
 Apache License 2.0
 
-## 了解更多
-
-- [API 文档](https://github.com/ForeverStr/jorm/wiki)
-- [示例项目](https://github.com/ForeverStr/jorm-examples)
-- [更新日志](https://github.com/ForeverStr/jorm/releases)
-
 ## 支持
 
 如有问题，请通过以下方式联系：
