@@ -2,10 +2,12 @@ package io.github.foreverstr.session;
 
 import io.github.foreverstr.annotation.Aggregation;
 import io.github.foreverstr.annotation.Column;
+import io.github.foreverstr.cache.CacheManager;
 import io.github.foreverstr.session.base.BaseSession;
 import io.github.foreverstr.exception.ErrorCode;
 import io.github.foreverstr.exception.JormException;
 import io.github.foreverstr.sqlBuilder.SaveBuilder;
+import io.github.foreverstr.transaction.TransactionTemplate;
 import io.github.foreverstr.util.SessionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +76,14 @@ public class SaveSession extends BaseSession<SaveSession> {
         } catch (IllegalAccessException e) {
             log.error("单个插入参数绑定失败: {}", e.getMessage(), e);
             throw new JormException(ErrorCode.PARAMETER_BINDING_FAILED);
+        }
+        // 清除相关缓存
+        if (CacheManager.isCacheEnabled()) {
+            final String regionToClear = entity.getClass().getName();
+            TransactionTemplate.doAfterCommit(() -> {
+                CacheManager.getSecondLevelCache().clearRegion(regionToClear);
+                log.debug("Cleared cache region after commit: {}", regionToClear);
+            });
         }
     }
     /**

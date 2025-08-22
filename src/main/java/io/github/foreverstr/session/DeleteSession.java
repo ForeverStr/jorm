@@ -1,8 +1,10 @@
 package io.github.foreverstr.session;
 
+import io.github.foreverstr.cache.CacheManager;
 import io.github.foreverstr.dto.Condition;
 import io.github.foreverstr.session.base.BaseSession;
 import io.github.foreverstr.sqlBuilder.DeleteBuilder;
+import io.github.foreverstr.transaction.TransactionTemplate;
 import io.github.foreverstr.util.EntityHelper;
 import io.github.foreverstr.exception.ErrorCode;
 import io.github.foreverstr.exception.JormException;
@@ -71,6 +73,11 @@ public class DeleteSession extends BaseSession<DeleteSession> {
             deleteBatch((Collection<?>) entity);
         } else {
             deleteSingle(entity);
+        }
+        // 清除相关缓存
+        if (CacheManager.isCacheEnabled()) {
+            CacheManager.getSecondLevelCache().clearRegion(entity.getClass().getName());
+            log.debug("清除缓存区域: [Class={}]", entity.getClass().getName());
         }
     }
     // 执行单个实例对象删除
@@ -173,6 +180,14 @@ public class DeleteSession extends BaseSession<DeleteSession> {
         }finally {
             // 每次执行后重置状态
             resetState();
+        }
+        // 缓存清理
+        if (CacheManager.isCacheEnabled()) {
+            final String regionToClear = clazz.getName();
+            TransactionTemplate.doAfterCommit(() -> {
+                CacheManager.getSecondLevelCache().clearRegion(regionToClear);
+                log.debug("Cleared cache region after commit: {}", regionToClear);
+            });
         }
     }
     private void resetState() {

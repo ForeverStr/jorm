@@ -7,6 +7,7 @@ import io.github.foreverstr.session.DeleteSession;
 import io.github.foreverstr.session.FindSession;
 import io.github.foreverstr.session.SaveSession;
 import io.github.foreverstr.session.UpdateSession;
+import io.github.foreverstr.transaction.CurrentTransactionConnection;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -50,6 +51,12 @@ public class Jorm {
 
     // 统一的连接获取方法（处理异常）
     public static Connection getConnection() {
+        // 优先返回当前事务中的连接
+        Connection transactionConn = CurrentTransactionConnection.get();
+        if (transactionConn != null) {
+            return transactionConn;
+        }
+
         try {
             return dataSource.getConnection();
         } catch (SQLException e) {

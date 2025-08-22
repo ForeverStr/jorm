@@ -3,6 +3,7 @@ package io.github.foreverstr.session.base;
 import io.github.foreverstr.exception.ErrorCode;
 import io.github.foreverstr.exception.JormException;
 import io.github.foreverstr.session.factory.Jorm;
+import io.github.foreverstr.transaction.CurrentTransactionConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,7 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
     private final Map<String, Savepoint> savepoints = new LinkedHashMap<>();
     private static final Logger log = LoggerFactory.getLogger(BaseSession.class);
     private final AtomicBoolean closed = new AtomicBoolean(false);
+    private final Map<Class<?>, Map<Object, Object>> firstLevelCache = new HashMap<>(); // 一级缓存
 
     // 用于支持手动事务，闭包事务
     protected BaseSession(Connection connection) {
@@ -51,9 +53,35 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
             throw new JormException(ErrorCode.SESSION_HAS_CLOSED);
         }
     }
+    protected <E> E getFromCache(Class<E> clazz, Object id) {
+        Map<Object, Object> cachePerClass = firstLevelCache.get(clazz);
+        if (cachePerClass != null) {
+            return (E) cachePerClass.get(id);
+        }
+        return null;
+    }
+
+    protected void putInCache(Object entity, Object id) {
+        Class<?> clazz = entity.getClass();
+        Map<Object, Object> cachePerClass = firstLevelCache.computeIfAbsent(clazz, k -> new HashMap<>());
+        cachePerClass.put(id, entity);
+    }
+
+    protected void clearCache() {
+        firstLevelCache.clear();
+    }
+
 
     @Override
     public void close() {
+        clearCache(); // 清空一级缓存
+        // 如果在事务中，不要关闭连接
+        if (CurrentTransactionConnection.hasTransaction() &&
+                CurrentTransactionConnection.get() == this.connection) {
+            log.debug("Skipping connection close in transaction");
+            return;
+        }
+
         if (!closed.compareAndSet(false, true)) {
             return;
         }

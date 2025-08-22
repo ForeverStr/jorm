@@ -1,0 +1,18 @@
+# Redis ??
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password:
+    database: 0
+
+# JORM ????
+jorm:
+  cache:
+    redis:
+      enabled: true
+      default-expiration: 3600 # ???????????
+      key-prefix: "jorm:cache:"
+      use-key-prefix: true
+      cache-null-values: false
+

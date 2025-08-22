@@ -6,6 +6,8 @@ import io.github.foreverstr.sqlBuilder.FindBuilder;
 import io.github.foreverstr.util.ResultSetMapper;
 import io.github.foreverstr.exception.ErrorCode;
 import io.github.foreverstr.exception.JormException;
+import io.github.foreverstr.cache.CacheManager;
+import io.github.foreverstr.util.EntityHelper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,7 +164,16 @@ public class FindSession extends BaseSession<FindSession> {
             log.error("[ErrorCode={}] 模型未指定", ErrorCode.MODEL_NOT_SPECIFIED.getCode());
             throw new JormException(ErrorCode.MODEL_NOT_SPECIFIED, "模型未指定");
         }
-
+        // 生成缓存键
+        String cacheKey = generateCacheKey(clazz, conditions, limit, orderBy, group, havingConditions, selectClause);
+        // 尝试从二级缓存获取
+        if (CacheManager.isCacheEnabled()) {
+            Object cachedResult = CacheManager.getSecondLevelCache().get(clazz.getName(), cacheKey);
+            if (cachedResult != null) {
+                log.debug("从二级缓存获取数据: [Class={}, Key={}]", clazz.getName(), cacheKey);
+                return (List<T>) cachedResult;
+            }
+        }
         String sql = null;
         try {
             sql = FindBuilder.buildFindSelect(clazz, conditions, limit, orderBy, group, havingConditions, selectClause);
@@ -173,7 +184,13 @@ public class FindSession extends BaseSession<FindSession> {
                     stmt.setObject(i + 1, params.get(i));
                 }
                 ResultSet rs = stmt.executeQuery();
-                return ResultSetMapper.mapToList(rs, clazz);
+                List<T> result = ResultSetMapper.mapToList(rs, clazz);
+                // 将结果放入二级缓存
+                if (CacheManager.isCacheEnabled() && result != null && !result.isEmpty()) {
+                    CacheManager.getSecondLevelCache().put(clazz.getName(), cacheKey, result);
+                    log.debug("数据已缓存: [Class={}, Key={}, Size={}]", clazz.getName(), cacheKey, result.size());
+                }
+                return result;
             }
         } catch (SQLException e) {
             String errorMsg = String.format("SQL执行失败 [SQL=%s, Params=%s]", sql, params);
@@ -190,6 +207,48 @@ public class FindSession extends BaseSession<FindSession> {
         } finally {
             resetState(); // 确保每次执行后状态重置
         }
+    }
+    private String generateCacheKey(Class<?> clazz, List<Condition> conditions, Integer limit,
+                                    String orderBy, String group, List<Condition> havingConditions,
+                                    String selectClause) {
+        StringBuilder keyBuilder = new StringBuilder();
+        keyBuilder.append("select:").append(selectClause);
+
+        if (conditions != null && !conditions.isEmpty()) {
+            keyBuilder.append(":where:");
+            for (Condition condition : conditions) {
+                keyBuilder.append(condition.getColumn()).append(condition.getOperator());
+                if (condition.getValue() != null) {
+                    keyBuilder.append(condition.getValue().toString());
+                }
+                keyBuilder.append(";");
+            }
+        }
+
+        if (group != null) {
+            keyBuilder.append(":group:").append(group);
+        }
+
+        if (havingConditions != null && !havingConditions.isEmpty()) {
+            keyBuilder.append(":having:");
+            for (Condition condition : havingConditions) {
+                keyBuilder.append(condition.getColumn()).append(condition.getOperator());
+                if (condition.getValue() != null) {
+                    keyBuilder.append(condition.getValue().toString());
+                }
+                keyBuilder.append(";");
+            }
+        }
+
+        if (orderBy != null) {
+            keyBuilder.append(":order:").append(orderBy);
+        }
+
+        if (limit != null) {
+            keyBuilder.append(":limit:").append(limit);
+        }
+
+        return keyBuilder.toString();
     }
     private void resetState() {
         this.conditions.clear();

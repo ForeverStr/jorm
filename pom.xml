@@ -124,6 +124,22 @@
             <version>5.3.34</version>
             <scope>test</scope>
         </dependency>
+        <!-- 字节码增强插件 -->
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.14.10</version>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <version>1.14.10</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.foreverstr</groupId>
+            <artifactId>jorm-spring-boot-starter</artifactId>
+            <version>1.0.5</version>
+        </dependency>
     </dependencies>
 
     <build>
