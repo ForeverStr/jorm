@@ -49,7 +49,7 @@ public class FindBuilder {
                                 "(" +
                                 "[a-zA-Z0-9_]+(\\s+AS\\s+[a-zA-Z0-9_]+)?" +  // 普通列名或别名
                                 "|" +
-                                "(?-i)(SUM|COUNT|AVG|MAX|MIN)\\([a-zA-Z0-9_]+\\)(\\s+AS\\s+[a-zA-Z0-9_]+)?" + // 聚合函数（强制大写）
+                                "(SUM|COUNT|AVG|MAX|MIN)\\s*\\([a-zA-Z0-9_]+\\)(\\s+AS\\s+[a-zA-Z0-9_]+)?" + // 聚合函数（允许大小写和空格）
                                 ")";
                 if (!part.matches(regex)) {
                     throw new JormException(ErrorCode.INVALID_SELECT_CLAUSE);

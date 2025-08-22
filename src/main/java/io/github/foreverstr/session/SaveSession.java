@@ -3,6 +3,7 @@ package io.github.foreverstr.session;
 import io.github.foreverstr.annotation.Aggregation;
 import io.github.foreverstr.annotation.Column;
 import io.github.foreverstr.cache.CacheManager;
+import io.github.foreverstr.cache.SecondLevelCache;
 import io.github.foreverstr.session.base.BaseSession;
 import io.github.foreverstr.exception.ErrorCode;
 import io.github.foreverstr.exception.JormException;
@@ -79,11 +80,14 @@ public class SaveSession extends BaseSession<SaveSession> {
         }
         // 清除相关缓存
         if (CacheManager.isCacheEnabled()) {
-            final String regionToClear = entity.getClass().getName();
-            TransactionTemplate.doAfterCommit(() -> {
-                CacheManager.getSecondLevelCache().clearRegion(regionToClear);
-                log.debug("Cleared cache region after commit: {}", regionToClear);
-            });
+            final SecondLevelCache cache = CacheManager.getSecondLevelCache();
+            if (cache != null) {
+                final String regionToClear = entity.getClass().getName();
+                TransactionTemplate.doAfterCommit(() -> {
+                    cache.clearRegion(regionToClear);
+                    log.debug("Cleared cache region after commit: {}", regionToClear);
+                });
+            }
         }
     }
     /**
