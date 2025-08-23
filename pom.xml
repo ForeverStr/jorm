@@ -7,7 +7,7 @@
     <!-- 项目坐标 -->
     <groupId>io.github.foreverstr</groupId>
     <artifactId>jorm</artifactId>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -134,11 +134,6 @@
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy-agent</artifactId>
             <version>1.14.10</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.foreverstr</groupId>
-            <artifactId>jorm-spring-boot-starter</artifactId>
-            <version>1.0.5</version>
         </dependency>
     </dependencies>
 

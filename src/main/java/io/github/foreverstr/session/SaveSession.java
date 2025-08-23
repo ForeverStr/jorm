@@ -80,7 +80,7 @@ public class SaveSession extends BaseSession<SaveSession> {
         }
         // 清除相关缓存
         if (CacheManager.isCacheEnabled()) {
-            final SecondLevelCache cache = CacheManager.getSecondLevelCache();
+            SecondLevelCache cache = CacheManager.getSecondLevelCache();
             if (cache != null) {
                 final String regionToClear = entity.getClass().getName();
                 TransactionTemplate.doAfterCommit(() -> {

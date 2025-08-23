@@ -1,6 +1,7 @@
 package io.github.foreverstr.session;
 
 import io.github.foreverstr.cache.CacheManager;
+import io.github.foreverstr.cache.SecondLevelCache;
 import io.github.foreverstr.dto.Condition;
 import io.github.foreverstr.exception.ErrorCode;
 import io.github.foreverstr.exception.JormException;
@@ -153,9 +154,10 @@ public class UpdateSession extends BaseSession<UpdateSession> {
         }
         // 缓存清理
         if (CacheManager.isCacheEnabled() && entityClass != null) {
+            SecondLevelCache cache = CacheManager.getSecondLevelCache();
             final String regionToClear = entityClass.getName();
             TransactionTemplate.doAfterCommit(() -> {
-                CacheManager.getSecondLevelCache().clearRegion(regionToClear);
+                cache.clearRegion(regionToClear);
                 log.debug("Cleared cache region after commit: {}", regionToClear);
             });
         }

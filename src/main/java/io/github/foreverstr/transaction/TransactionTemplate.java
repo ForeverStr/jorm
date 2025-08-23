@@ -61,11 +61,14 @@ public class TransactionTemplate {
                 log.debug("Transaction committed");
 
                 // 执行提交后的回调
-                for (Runnable callback : callbacks) {
-                    try {
-                        callback.run();
-                    } catch (Exception e) {
-                        log.error("After-commit callback failed", e);
+                callbacks = afterCommitCallbacks.get();
+                if (callbacks != null) {
+                    for (Runnable callback : callbacks) {
+                        try {
+                            callback.run();
+                        } catch (Exception e) {
+                            log.error("After-commit callback failed", e);
+                        }
                     }
                 }
             }

@@ -1,5 +1,6 @@
 package io.github.foreverstr.session;
 
+import io.github.foreverstr.cache.SecondLevelCache;
 import io.github.foreverstr.dto.Condition;
 import io.github.foreverstr.session.base.BaseSession;
 import io.github.foreverstr.sqlBuilder.FindBuilder;
@@ -168,7 +169,8 @@ public class FindSession extends BaseSession<FindSession> {
         String cacheKey = generateCacheKey(clazz, conditions, limit, orderBy, group, havingConditions, selectClause);
         // 尝试从二级缓存获取
         if (CacheManager.isCacheEnabled()) {
-            Object cachedResult = CacheManager.getSecondLevelCache().get(clazz.getName(), cacheKey);
+            SecondLevelCache cache = CacheManager.getSecondLevelCache();
+            Object cachedResult = cache.get(clazz.getName(), cacheKey);
             if (cachedResult != null) {
                 log.debug("从二级缓存获取数据: [Class={}, Key={}]", clazz.getName(), cacheKey);
                 return (List<T>) cachedResult;
@@ -187,7 +189,8 @@ public class FindSession extends BaseSession<FindSession> {
                 List<T> result = ResultSetMapper.mapToList(rs, clazz);
                 // 将结果放入二级缓存
                 if (CacheManager.isCacheEnabled() && result != null && !result.isEmpty()) {
-                    CacheManager.getSecondLevelCache().put(clazz.getName(), cacheKey, result);
+                    SecondLevelCache cache = CacheManager.getSecondLevelCache();
+                    cache.put(clazz.getName(), cacheKey, result);
                     log.debug("数据已缓存: [Class={}, Key={}, Size={}]", clazz.getName(), cacheKey, result.size());
                 }
                 return result;

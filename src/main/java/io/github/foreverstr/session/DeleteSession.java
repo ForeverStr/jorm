@@ -1,6 +1,7 @@
 package io.github.foreverstr.session;
 
 import io.github.foreverstr.cache.CacheManager;
+import io.github.foreverstr.cache.SecondLevelCache;
 import io.github.foreverstr.dto.Condition;
 import io.github.foreverstr.session.base.BaseSession;
 import io.github.foreverstr.sqlBuilder.DeleteBuilder;
@@ -183,9 +184,10 @@ public class DeleteSession extends BaseSession<DeleteSession> {
         }
         // 缓存清理
         if (CacheManager.isCacheEnabled()) {
+            SecondLevelCache cache = CacheManager.getSecondLevelCache();
             final String regionToClear = clazz.getName();
             TransactionTemplate.doAfterCommit(() -> {
-                CacheManager.getSecondLevelCache().clearRegion(regionToClear);
+                cache.clearRegion(regionToClear);
                 log.debug("Cleared cache region after commit: {}", regionToClear);
             });
         }
