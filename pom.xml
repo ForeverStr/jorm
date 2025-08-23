@@ -68,11 +68,6 @@
     </distributionManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.33</version>
-        </dependency>
         <!-- junit 单元测试 -->
         <dependency>
             <groupId>junit</groupId>
@@ -98,42 +93,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.36</version>
-        </dependency>
-        <!-- Logback Classic (SLF4J 实现) -->
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.2.11</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.2.11</version>
-        </dependency>
-        <!-- Spring Framework 核心库 -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>5.3.34</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- Spring JDBC 工具 -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-            <version>5.3.34</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- 字节码增强插件 -->
-        <dependency>
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy</artifactId>
-            <version>1.14.10</version>
-        </dependency>
-        <dependency>
-            <groupId>net.bytebuddy</groupId>
-            <artifactId>byte-buddy-agent</artifactId>
-            <version>1.14.10</version>
         </dependency>
     </dependencies>
 
