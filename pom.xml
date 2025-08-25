@@ -68,6 +68,12 @@
     </distributionManagement>
 
     <dependencies>
+        <!-- SLF4J日志接口 -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.36</version>
+        </dependency>
         <!-- junit 单元测试 -->
         <dependency>
             <groupId>junit</groupId>
@@ -81,18 +87,39 @@
             <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
-        <!-- H2 内存数据库 -->
+        <!-- H2 内存数据库 ，用于测试-->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>2.2.224</version>
             <scope>test</scope>
         </dependency>
-        <!-- SLF4J API -->
+        <!-- Spring依赖，用于测试 -->
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.36</version>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>5.3.34</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- JDBC工具，用于测试-->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>5.3.34</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- 日志实现，用于测试 -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.11</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>1.2.11</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
