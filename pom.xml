@@ -7,7 +7,7 @@
     <!-- 项目坐标 -->
     <groupId>io.github.foreverstr</groupId>
     <artifactId>jorm</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.8</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

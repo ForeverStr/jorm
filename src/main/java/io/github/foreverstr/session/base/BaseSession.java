@@ -36,12 +36,15 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
     protected BaseSession() {
         this(Jorm.getConnection());
         this.isManagedConnection = true;
-        try {
-            this.connection.setAutoCommit(true);
-        } catch (SQLException e) {
-            log.error("[ErrorCode={}] 自动事务开启失败，自动提交设置异常",
-                    ErrorCode.TRANSACTION_AUTOMATIC_FAILED.getCode(), e);
-            throw new JormException(ErrorCode.TRANSACTION_AUTOMATIC_FAILED, e);
+        // 只在当前线程没有事务时才启用自动提交
+        if (!CurrentTransactionConnection.hasTransaction()) {
+            try {
+                this.connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                log.error("[ErrorCode={}] 自动事务开启失败，自动提交设置异常",
+                        ErrorCode.TRANSACTION_AUTOMATIC_FAILED.getCode(), e);
+                throw new JormException(ErrorCode.TRANSACTION_AUTOMATIC_FAILED, e);
+            }
         }
     }
     // 抽象方法：返回当前对象的引用（子类需实现）
@@ -94,17 +97,16 @@ public abstract class BaseSession<T extends BaseSession<T>> implements AutoClose
             return;
         }
         try {
-            if (!connection.isClosed()) {
-                if (!connection.getAutoCommit()) {
-                    log.warn("未提交事务被自动回滚");
-                    connection.rollback();
-                }
-                connection.close();
+            if (!connection.isClosed() && !connection.getAutoCommit()) {
+                connection.rollback();
+                log.debug("非事务环境：未提交事务已回滚");
             }
+            if (!connection.isClosed()) connection.close();
         } catch (SQLException e) {
-            closed.set(false);
             log.error("[ErrorCode={}] 关闭连接失败", ErrorCode.SESSION_CLOSED_FAILED.getCode(), e);
             throw new JormException(ErrorCode.SESSION_CLOSED_FAILED, e);
+        }finally {
+            closed.set(true);
         }
     }
     /**

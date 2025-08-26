@@ -90,16 +90,36 @@ public enum ErrorCode {
 # application.yml
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/test
+    url: jdbc:tc:mysql:8.0:///orm?TC_INITSCRIPT=schema.sql
     username: root
-    password: password
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: root
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
+
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
 
 jorm:
+  jdbc-url: ${spring.datasource.url}
+  username: ${spring.datasource.username}
+  password: ${spring.datasource.password}
+  driver-class-name: ${spring.datasource.driver-class-name}
+  maximum-pool-size: 5
+  minimum-idle: 1
+
   cache:
     redis:
       enabled: true
-      default-expiration: 3600
+      default-expiration: 60
+      key-prefix: jorm:test:
+      use-key-prefix: true
+      cache-null-values: false
+
+logging:
+  level:
+    io.github.foreverstr: DEBUG
+    org.springframework.jdbc: DEBUG
+    org.testcontainers: INFO
 ```
 
 ### 3. 定义实体类
@@ -212,30 +232,6 @@ CacheManager.getSecondLevelCache().clearRegion(User.class.getName());
 
 // 禁用缓存
 CacheManager.setCacheEnabled(false);
-```
-
-## 配置选项
-
-### 数据源配置
-```yaml
-jorm:
-  maximum-pool-size: 10
-  minimum-idle: 2
-  connection-timeout: 30000
-  idle-timeout: 600000
-  max-lifetime: 1800000
-```
-
-### 缓存配置
-```yaml
-jorm:
-  cache:
-    redis:
-      enabled: true
-      default-expiration: 3600
-      key-prefix: "jorm:cache:"
-      use-key-prefix: true
-      cache-null-values: false
 ```
 ## 版本要求
 
