@@ -29,9 +29,57 @@ new UpdateSession()
 ```
 
 ### 🔄 多种事务管理方式
-- **自动事务**: 默认模式，自动提交
-- **手动事务**: 精确控制事务边界
-- **声明式事务**: 基于注解的事务管理
+- **编程式事务**: 面向使用核心模块的用户，提供轻量且可选的事务方案
+```java
+// 1. 自动事务（单会话操作）
+try (SaveSession session = new SaveSession()) {
+        // 默认开启自动事务，操作完成自动提交
+        session.save(user);
+}
+// 2. 手动事务管理
+Connection conn = TransactionManager.begin();
+try (JormSession session = new JormSession(conn)) {
+        // 业务操作
+        session.save(user1);
+    session.save(user2);
+    TransactionManager.commit();
+} catch (Exception e) {
+        TransactionManager.rollback();
+    throw new RuntimeException("事务执行失败", e);
+} finally {
+        TransactionManager.release(); // 必须释放连接，否则会造成连接泄漏
+}
+// 3. 自定义TransactionTemplate简化
+        new TransactionTemplate().execute(() -> {
+        // 事务内的操作
+        try (SaveSession session = new SaveSession()) {
+        session.save(user1);
+        session.save(user2);
+    }
+            return null;
+            }); 
+```
+- **声明式事务**: 面向使用starter模块的Spring用户
+```java
+@Service
+public class UserService {
+    @Transactional// jorm会自动加入spring事务
+    public void batchOperation() {
+        try (FindSession findSession = new FindSession();
+             UpdateSession updateSession = new UpdateSession()) {
+
+            // 查询和更新都在同一个Spring事务内
+            List<User> users = findSession.Where("status", "active").Find(User.class);
+            for (User user : users) {
+                updateSession.Model(User.class)
+                        .Where("id", user.getId())
+                        .Set("age", user.getAge() + 1)
+                        .Update();
+            }
+        }
+    }
+}
+```
 
 ### ⚡ 二级缓存支持
 集成 Redis 作为二级缓存，大幅提升查询性能：
@@ -71,11 +119,11 @@ public enum ErrorCode {
 <dependency>
     <groupId>io.github.foreverstr</groupId>
     <artifactId>jorm</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.8</version>
 </dependency>
 ```
 
-**Spring Boot Starter**:
+**Starter模块**:
 ```xml
 <dependency>
     <groupId>io.github.foreverstr</groupId>
@@ -189,29 +237,6 @@ public void doBusiness() {
 ```
 
 ## 高级特性
-
-### 事务管理
-
-**手动事务**:
-```java
-Connection conn = TransactionManager.begin();
-try (JormSession session = new JormSession(conn)) {
-    // 业务操作
-    TransactionManager.commit();
-} catch (Exception e) {
-    TransactionManager.rollback();
-} finally {
-    TransactionManager.release();
-}
-```
-
-**声明式事务**:
-```java
-new TransactionTemplate().execute(() -> {
-    // 事务内的操作
-    return null;
-});
-```
 
 ### 批量操作
 
